@@ -42,6 +42,7 @@ next-env.d.ts
 
 # internal documentation
 CLAUDE.md
+AGENTS.md
 /blueprints/
 
 # generated large assets
