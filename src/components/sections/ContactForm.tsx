@@ -1,13 +1,23 @@
+"use client";
+
 import React from "react";
 
+/**
+ * ContactForm is now implemented inline within ChapterViews → ContactSection.
+ * This file is kept as a clean stub to avoid breaking any future imports.
+ */
 export interface ContactFormProps {
-  onSubmit: () => void;
+  onSubmit?: () => void;
 }
 
 export function ContactForm({ onSubmit }: ContactFormProps) {
   return (
-    <form onSubmit={onSubmit}>
-      <button type="submit">Submit</button>
-    </form>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit?.();
+      }}
+      aria-label="Contact form stub"
+    />
   );
 }

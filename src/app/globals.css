@@ -1,26 +1,94 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #000000;
+  --foreground: #ffffff;
+  --gold: #d4af37;
+  --gold-muted: rgba(212, 175, 55, 0.6);
+
+  /* New Refined Color Palette */
+  --text-primary: #FDFBF7;
+  --text-secondary: #A1A1AA;
+  --brand-gold: #D4AF37;
+  --brand-gold-light: #EAD68C;
+  --brand-gold-dark: #8C7123;
+  --bg-base: #050505;
+  --bg-surface: rgba(20, 20, 20, 0.4);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand-gold: var(--brand-gold);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: #000000;
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #000000;
+  color: #ffffff;
+  font-family: var(--font-geist-sans), "Inter", Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark-mode native inputs */
+input,
+textarea,
+select {
+  color-scheme: dark;
+  background-color: transparent;
+  font-family: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: rgba(212, 175, 55, 0.45) !important;
+}
+
+/* Modal scroll container */
+[role="dialog"] [style*="overflow-y: auto"],
+[role="dialog"] [style*="overflowY"] {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+}
+
+/* Thin gold scrollbar (only for modals/forms) */
+[role="dialog"]::-webkit-scrollbar,
+[role="dialog"] *::-webkit-scrollbar {
+  width: 3px;
+}
+[role="dialog"] *::-webkit-scrollbar-track {
+  background: transparent;
+}
+[role="dialog"] *::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.3);
+  border-radius: 2px;
+}
+
+/* Smooth button transitions */
+button {
+  -webkit-tap-highlight-color: transparent;
 }
