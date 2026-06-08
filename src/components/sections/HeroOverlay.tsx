@@ -62,32 +62,17 @@ export function HeroOverlay({ progress }: HeroOverlayProps) {
   return (
     <div
       aria-label="The Blackstone Hotel — hero title"
+      className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10"
       style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        pointerEvents: "none",
         opacity,
         transform: `translateY(${translateY}px) scale(${scale})`,
         filter: blur > 0.2 ? `blur(${blur}px)` : "none",
         transition: "none",
-        zIndex: 10,
         willChange: "opacity, transform, filter",
       }}
     >
       {/* Top decorative structure */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "0",
-          marginBottom: "clamp(16px, 2.5vh, 32px)",
-        }}
-      >
+      <div className="flex flex-col items-center gap-0 mb-[clamp(16px,2.5vh,32px)]">
         <div
           style={{
             width: `${ruleWidth}px`,
@@ -99,60 +84,25 @@ export function HeroOverlay({ progress }: HeroOverlayProps) {
         />
         <div
           aria-hidden="true"
-          style={{
-            width: "5px",
-            height: "5px",
-            background: "rgba(212,175,55,0.7)",
-            transform: "rotate(45deg)",
-            margin: "10px 0",
-          }}
+          className="w-[5px] h-[5px] bg-[rgba(212,175,55,0.7)] rotate-45 my-[10px]"
         />
       </div>
 
       {/* Location tag above name */}
-      <p
-        style={{
-          fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-          fontSize: "clamp(0.6rem, 1.4vw, 1rem)",
-          fontWeight: 600,
-          color: "var(--brand-gold)",
-          letterSpacing: "0.65em",
-          textTransform: "uppercase",
-          margin: "0 0 clamp(8px, 1.5vh, 20px) 0",
-          textAlign: "center",
-          textShadow: "0 2px 8px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,0.8)",
-        }}
-      >
+      <p className="font-cormorant text-[clamp(0.6rem,1.4vw,1rem)] font-semibold text-brand-gold tracking-[0.65em] uppercase text-center mb-[clamp(8px,1.5vh,20px)] [text-shadow:0_2px_8px_rgba(0,0,0,0.9),0_0_2px_rgba(0,0,0,0.8)]">
         RAJKOT · GUJARAT
       </p>
 
       {/* THE BLACKSTONE — Main title */}
       <h1
-        style={{
-          fontFamily: "'Playfair Display', 'Georgia', serif",
-          fontSize: "clamp(2rem, 5vw, 4.5rem)",
-          fontWeight: 700,
-          color: "var(--text-primary)",
-          letterSpacing: `${letterSpacing}em`,
-          textTransform: "uppercase",
-          textAlign: "center",
-          margin: 0,
-          lineHeight: 1,
-          textShadow: "0 4px 24px rgba(0,0,0,0.85), 0 2px 10px rgba(0,0,0,0.5)",
-        }}
+        className="font-playfair text-[clamp(2rem,5vw,4.5rem)] font-bold text-[var(--text-primary)] uppercase text-center m-0 leading-none [text-shadow:0_4px_24px_rgba(0,0,0,0.85),0_2px_10px_rgba(0,0,0,0.5)]"
+        style={{ letterSpacing: `${letterSpacing}em` }}
       >
         THE BLACKSTONE
       </h1>
 
       {/* Divider row */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
-          margin: "clamp(14px, 2.5vh, 24px) 0",
-        }}
-      >
+      <div className="flex items-center gap-4 my-[clamp(14px,2.5vh,24px)]">
         <div
           style={{
             width: "clamp(40px, 7vw, 100px)",
@@ -162,13 +112,7 @@ export function HeroOverlay({ progress }: HeroOverlayProps) {
         />
         <div
           aria-hidden="true"
-          style={{
-            width: "4px",
-            height: "4px",
-            border: "1px solid rgba(212,175,55,0.6)",
-            transform: "rotate(45deg)",
-            flexShrink: 0,
-          }}
+          className="w-[4px] h-[4px] border border-[rgba(212,175,55,0.6)] rotate-45 shrink-0"
         />
         <div
           style={{
@@ -180,41 +124,15 @@ export function HeroOverlay({ progress }: HeroOverlayProps) {
       </div>
 
       {/* HOTEL subtitle */}
-      <p
-        style={{
-          fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-          fontSize: "clamp(0.75rem, 2vw, 1.5rem)",
-          fontWeight: 600,
-          color: "var(--brand-gold)",
-          letterSpacing: "0.75em",
-          textTransform: "uppercase",
-          margin: "0",
-          textAlign: "center",
-          textShadow: "0 2px 10px rgba(0,0,0,0.95), 0 0 4px rgba(0,0,0,0.8)",
-        }}
-      >
+      <p className="font-cormorant text-[clamp(0.75rem,2vw,1.5rem)] font-semibold text-brand-gold tracking-[0.75em] uppercase m-0 text-center [text-shadow:0_2px_10px_rgba(0,0,0,0.95),0_0_4px_rgba(0,0,0,0.8)]">
         HOTEL
       </p>
 
       {/* Bottom rule */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "0",
-          marginTop: "clamp(16px, 2.5vh, 32px)",
-        }}
-      >
+      <div className="flex flex-col items-center gap-0 mt-[clamp(16px,2.5vh,32px)]">
         <div
           aria-hidden="true"
-          style={{
-            width: "4px",
-            height: "4px",
-            background: "rgba(212,175,55,0.5)",
-            transform: "rotate(45deg)",
-            margin: "0 0 10px 0",
-          }}
+          className="w-[4px] h-[4px] bg-[rgba(212,175,55,0.5)] rotate-45 mb-[10px]"
         />
         <div
           style={{
@@ -228,55 +146,21 @@ export function HeroOverlay({ progress }: HeroOverlayProps) {
 
       {/* Tagline — appears after name */}
       <p
-        style={{
-          fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-          fontSize: "clamp(0.7rem, 1.3vw, 1.05rem)",
-          fontWeight: 500,
-          color: "rgba(255,255,255,0.85)",
-          letterSpacing: "0.2em",
-          textAlign: "center",
-          margin: "clamp(20px, 3vh, 36px) 0 0 0",
-          fontStyle: "italic",
-          opacity: progress > 0.1 ? Math.min(1, (progress - 0.1) / 0.2) : 0,
-          textShadow: "0 2px 12px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.6)",
-        }}
+        className="font-cormorant text-[clamp(0.7rem,1.3vw,1.05rem)] font-medium text-white/85 tracking-[0.2em] text-center mt-[clamp(20px,3vh,36px)] italic [text-shadow:0_2px_12px_rgba(0,0,0,0.9),0_0_4px_rgba(0,0,0,0.6)]"
+        style={{ opacity: progress > 0.1 ? Math.min(1, (progress - 0.1) / 0.2) : 0 }}
       >
         Where luxury meets legacy
       </p>
 
       {/* Scroll cue */}
       <div
-        style={{
-          position: "absolute",
-          bottom: "clamp(28px, 4vh, 56px)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "10px",
-          opacity: progress < 0.08 ? 1 : Math.max(0, 1 - (progress - 0.08) / 0.1),
-          transition: "opacity 0.4s ease",
-        }}
+        className="absolute bottom-[clamp(28px,4vh,56px)] flex flex-col items-center gap-[10px] transition-opacity duration-400 ease"
+        style={{ opacity: progress < 0.08 ? 1 : Math.max(0, 1 - (progress - 0.08) / 0.1) }}
       >
-        <span
-          style={{
-            fontFamily: "'Geist Sans', sans-serif",
-            fontSize: "9px",
-            letterSpacing: "0.3em",
-            color: "rgba(255,255,255,0.4)",
-            textTransform: "uppercase",
-          }}
-        >
+        <span className="font-sans text-[9px] tracking-[0.3em] text-white/40 uppercase">
           Scroll to explore
         </span>
-        <div
-          style={{
-            width: "1px",
-            height: "36px",
-            background:
-              "linear-gradient(180deg, rgba(212,175,55,0.8), transparent)",
-            animation: "scrollPulse 2s ease-in-out infinite",
-          }}
-        />
+        <div className="w-[1px] h-[36px] bg-[linear-gradient(180deg,rgba(212,175,55,0.8),transparent)] animate-[scrollPulse_2s_ease-in-out_infinite]" />
       </div>
     </div>
   );

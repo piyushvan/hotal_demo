@@ -2,10 +2,6 @@
 
 import React from "react";
 
-const GOLD = "#d4af37";
-const GOLD_ALPHA = (a: number) => `rgba(212,175,55,${a})`;
-const WHITE_ALPHA = (a: number) => `rgba(255,255,255,${a})`;
-
 const PILLARS = [
   {
     icon: "⬡",
@@ -41,102 +37,35 @@ export function AboutSection() {
     <section
       id="about"
       aria-labelledby="about-heading"
-      style={{
-        background: "#050505",
-        borderTop: `1px solid ${GOLD_ALPHA(0.1)}`,
-        overflow: "hidden",
-      }}
+      className="bg-[#050505] border-t border-brand-gold/10 overflow-hidden"
     >
       {/* ── Hero Banner ── */}
-      <div
-        style={{
-          position: "relative",
-          padding: "clamp(80px, 14vh, 160px) clamp(24px, 6vw, 80px)",
-          background:
-            "linear-gradient(135deg, rgba(212,175,55,0.04) 0%, transparent 50%, rgba(212,175,55,0.02) 100%)",
-          textAlign: "center",
-          overflow: "hidden",
-        }}
-      >
+      <div className="relative px-[clamp(24px,6vw,80px)] py-[clamp(80px,14vh,160px)] bg-[linear-gradient(135deg,rgba(212,175,55,0.04)_0%,transparent_50%,rgba(212,175,55,0.02)_100%)] text-center overflow-hidden">
         {/* Background decorative element */}
         <div
           aria-hidden="true"
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "600px",
-            height: "600px",
-            border: `1px solid ${GOLD_ALPHA(0.04)}`,
-            borderRadius: "50%",
-            pointerEvents: "none",
-          }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-brand-gold/5 rounded-full pointer-events-none"
         />
         <div
           aria-hidden="true"
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "400px",
-            height: "400px",
-            border: `1px solid ${GOLD_ALPHA(0.06)}`,
-            borderRadius: "50%",
-            pointerEvents: "none",
-          }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] border border-brand-gold/5 rounded-full pointer-events-none"
         />
 
-        <p
-          style={{
-            fontFamily: "'Geist Sans', sans-serif",
-            fontSize: "10px",
-            letterSpacing: "0.5em",
-            textTransform: "uppercase",
-            color: GOLD_ALPHA(0.7),
-            margin: "0 0 20px 0",
-          }}
-        >
+        <p className="font-sans text-[10px] tracking-[0.5em] uppercase text-brand-gold/70 mb-[20px]">
           OUR STORY
         </p>
-        <div
-          style={{
-            width: "1px",
-            height: "48px",
-            background: `linear-gradient(180deg, transparent, ${GOLD}, transparent)`,
-            margin: "0 auto 24px",
-          }}
-        />
+        <div className="w-[1px] h-[48px] bg-[linear-gradient(180deg,transparent,var(--color-brand-gold),transparent)] mx-auto mb-[24px]" />
+        
         <h2
           id="about-heading"
-          style={{
-            fontFamily: "'Playfair Display', 'Georgia', serif",
-            fontSize: "clamp(2.2rem, 5.5vw, 5rem)",
-            fontWeight: 700,
-            color: "#ffffff",
-            margin: "0 0 24px 0",
-            lineHeight: 1.08,
-            letterSpacing: "0.04em",
-            maxWidth: "800px",
-            marginLeft: "auto",
-            marginRight: "auto",
-          }}
+          className="font-playfair text-[clamp(2.2rem,5.5vw,5rem)] font-bold text-white mb-[24px] leading-[1.08] tracking-[0.04em] max-w-[800px] mx-auto"
         >
           Not Just a Hotel.
           <br />
-          <span style={{ color: GOLD }}>A Living Legacy.</span>
+          <span className="text-brand-gold">A Living Legacy.</span>
         </h2>
-        <p
-          style={{
-            fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-            fontSize: "clamp(1.05rem, 1.5vw, 1.3rem)",
-            color: WHITE_ALPHA(0.6),
-            maxWidth: "620px",
-            margin: "0 auto",
-            lineHeight: 1.8,
-          }}
-        >
+        
+        <p className="font-cormorant text-[clamp(1.05rem,1.5vw,1.3rem)] text-white/60 max-w-[620px] mx-auto leading-[1.8]">
           The Blackstone was born from a singular conviction: that Rajkot
           deserved a hotel that matched the ambition and warmth of its people.
           A place where business meets beauty, where every arrival feels like
@@ -145,47 +74,18 @@ export function AboutSection() {
       </div>
 
       {/* ── Stats Bar ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          borderTop: `1px solid ${GOLD_ALPHA(0.1)}`,
-          borderBottom: `1px solid ${GOLD_ALPHA(0.1)}`,
-        }}
-      >
+      <div className="grid grid-cols-2 md:grid-cols-4 border-y border-brand-gold/10">
         {STATS.map((stat, i) => (
           <div
             key={stat.label}
-            style={{
-              padding: "clamp(28px, 4vh, 48px) clamp(16px, 3vw, 32px)",
-              textAlign: "center",
-              borderRight:
-                i < STATS.length - 1 ? `1px solid ${GOLD_ALPHA(0.08)}` : "none",
-              background: i % 2 === 0 ? "rgba(212,175,55,0.02)" : "transparent",
-            }}
+            className={`px-[clamp(16px,3vw,32px)] py-[clamp(28px,4vh,48px)] text-center ${
+              i < STATS.length - 1 ? "border-r border-brand-gold/10" : ""
+            } ${i % 2 === 0 ? "bg-brand-gold/5" : "bg-transparent"}`}
           >
-            <p
-              style={{
-                fontFamily: "'Playfair Display', 'Georgia', serif",
-                fontSize: "clamp(2rem, 4vw, 3.5rem)",
-                fontWeight: 700,
-                color: GOLD,
-                margin: "0 0 6px 0",
-                lineHeight: 1,
-              }}
-            >
+            <p className="font-playfair text-[clamp(2rem,4vw,3.5rem)] font-bold text-brand-gold mb-[6px] leading-none">
               {stat.value}
             </p>
-            <p
-              style={{
-                fontFamily: "'Geist Sans', sans-serif",
-                fontSize: "9px",
-                letterSpacing: "0.3em",
-                textTransform: "uppercase",
-                color: WHITE_ALPHA(0.4),
-                margin: 0,
-              }}
-            >
+            <p className="font-sans text-[9px] tracking-[0.3em] uppercase text-white/40 m-0">
               {stat.label}
             </p>
           </div>
@@ -193,99 +93,32 @@ export function AboutSection() {
       </div>
 
       {/* ── Our Pillars ── */}
-      <div
-        style={{
-          padding: "clamp(60px, 10vh, 100px) clamp(24px, 6vw, 80px)",
-          maxWidth: "1400px",
-          margin: "0 auto",
-        }}
-      >
-        <div style={{ textAlign: "center", marginBottom: "clamp(40px, 6vh, 64px)" }}>
-          <p
-            style={{
-              fontFamily: "'Geist Sans', sans-serif",
-              fontSize: "9px",
-              letterSpacing: "0.45em",
-              textTransform: "uppercase",
-              color: GOLD_ALPHA(0.65),
-              margin: "0 0 14px 0",
-            }}
-          >
+      <div className="px-[clamp(24px,6vw,80px)] py-[clamp(60px,10vh,100px)] max-w-[1400px] mx-auto">
+        <div className="text-center mb-[clamp(40px,6vh,64px)]">
+          <p className="font-sans text-[9px] tracking-[0.45em] uppercase text-brand-gold/65 mb-[14px]">
             WHAT DEFINES US
           </p>
-          <h3
-            style={{
-              fontFamily: "'Playfair Display', 'Georgia', serif",
-              fontSize: "clamp(1.6rem, 3.2vw, 2.8rem)",
-              fontWeight: 700,
-              color: "#ffffff",
-              margin: 0,
-              lineHeight: 1.2,
-            }}
-          >
+          <h3 className="font-playfair text-[clamp(1.6rem,3.2vw,2.8rem)] font-bold text-white m-0 leading-[1.2]">
             The Blackstone Philosophy
           </h3>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
-            gap: "clamp(20px, 3vw, 40px)",
-          }}
-        >
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-[clamp(20px,3vw,40px)]">
           {PILLARS.map((pillar) => (
             <div
               key={pillar.title}
-              style={{
-                padding: "clamp(24px, 3.5vw, 40px)",
-                background: "rgba(255,255,255,0.02)",
-                borderTop: `1px solid ${GOLD_ALPHA(0.18)}`,
-                borderBottom: `1px solid ${GOLD_ALPHA(0.06)}`,
-                transition: "background 0.3s ease, border-color 0.3s ease",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = "rgba(212,175,55,0.04)";
-                (e.currentTarget as HTMLDivElement).style.borderTopColor = GOLD_ALPHA(0.4);
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.02)";
-                (e.currentTarget as HTMLDivElement).style.borderTopColor = GOLD_ALPHA(0.18);
-              }}
+              className="p-[clamp(24px,3.5vw,40px)] bg-white/5 border-t border-brand-gold/20 border-b border-brand-gold/10 transition-colors duration-300 ease-in-out hover:bg-brand-gold/5 hover:border-t-brand-gold/40"
             >
               <span
                 aria-hidden="true"
-                style={{
-                  display: "block",
-                  fontSize: "22px",
-                  color: GOLD_ALPHA(0.6),
-                  marginBottom: "16px",
-                  lineHeight: 1,
-                }}
+                className="block text-[22px] text-brand-gold/60 mb-[16px] leading-none"
               >
                 ◆
               </span>
-              <h4
-                style={{
-                  fontFamily: "'Playfair Display', 'Georgia', serif",
-                  fontSize: "clamp(1.1rem, 1.6vw, 1.4rem)",
-                  fontWeight: 700,
-                  color: "#ffffff",
-                  margin: "0 0 14px 0",
-                  lineHeight: 1.25,
-                }}
-              >
+              <h4 className="font-playfair text-[clamp(1.1rem,1.6vw,1.4rem)] font-bold text-white mb-[14px] leading-[1.25]">
                 {pillar.title}
               </h4>
-              <p
-                style={{
-                  fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-                  fontSize: "clamp(0.9rem, 1.1vw, 1.05rem)",
-                  color: WHITE_ALPHA(0.6),
-                  lineHeight: 1.8,
-                  margin: 0,
-                }}
-              >
+              <p className="font-cormorant text-[clamp(0.9rem,1.1vw,1.05rem)] text-white/60 leading-[1.8] m-0">
                 {pillar.body}
               </p>
             </div>
@@ -294,56 +127,20 @@ export function AboutSection() {
       </div>
 
       {/* ── Team Quote ── */}
-      <div
-        style={{
-          padding: "clamp(48px, 8vh, 80px) clamp(24px, 6vw, 80px)",
-          background: "rgba(212,175,55,0.03)",
-          borderTop: `1px solid ${GOLD_ALPHA(0.08)}`,
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "700px",
-            margin: "0 auto",
-          }}
-        >
+      <div className="px-[clamp(24px,6vw,80px)] py-[clamp(48px,8vh,80px)] bg-brand-gold/5 border-t border-brand-gold/10 text-center">
+        <div className="max-w-[700px] mx-auto">
           <div
             aria-hidden="true"
-            style={{
-              fontSize: "48px",
-              color: GOLD_ALPHA(0.2),
-              lineHeight: 1,
-              marginBottom: "20px",
-              fontFamily: "Georgia, serif",
-            }}
+            className="text-[48px] text-brand-gold/20 leading-none mb-[20px] font-playfair"
           >
-            "
+            &quot;
           </div>
-          <p
-            style={{
-              fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-              fontSize: "clamp(1.2rem, 2vw, 1.8rem)",
-              fontStyle: "italic",
-              color: WHITE_ALPHA(0.8),
-              lineHeight: 1.7,
-              margin: "0 0 24px 0",
-            }}
-          >
+          <p className="font-cormorant text-[clamp(1.2rem,2vw,1.8rem)] italic text-white/80 leading-[1.7] mb-[24px]">
             We do not merely offer rooms. We offer context — a setting in which
             life&apos;s most important moments can unfold with the dignity and
             splendour they deserve.
           </p>
-          <p
-            style={{
-              fontFamily: "'Geist Sans', sans-serif",
-              fontSize: "9px",
-              letterSpacing: "0.35em",
-              textTransform: "uppercase",
-              color: GOLD_ALPHA(0.7),
-              margin: 0,
-            }}
-          >
+          <p className="font-sans text-[9px] tracking-[0.35em] uppercase text-brand-gold/70 m-0">
             — THE BLACKSTONE TEAM, RAJKOT
           </p>
         </div>

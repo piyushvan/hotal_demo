@@ -23,6 +23,8 @@
   --color-brand-gold: var(--brand-gold);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-playfair: "Playfair Display", "Georgia", serif;
+  --font-cormorant: "Cormorant Garamond", "Georgia", serif;
 }
 
 *,

@@ -73,40 +73,20 @@ function useCinematicText(
   }, [progress, approachEnd, readingEnd, exitStagger]);
 }
 
-// ─── Shared Design Tokens ─────────────────────────────────────────────────────
-
-const GOLD = "#d4af37";
-const GOLD_ALPHA = (a: number) => `rgba(212,175,55,${a})`;
-const WHITE_ALPHA = (a: number) => `rgba(255,255,255,${a})`;
-
 // ─── Reusable Transparent Components ─────────────────────────────────────────
 
 function GoldRule({ width = 52 }: { width?: number }) {
   return (
     <div
-      style={{
-        width,
-        height: "1px",
-        background: `linear-gradient(90deg, ${GOLD}, ${GOLD_ALPHA(0.2)})`,
-        marginBottom: "20px",
-      }}
+      className="h-[1px] bg-[linear-gradient(90deg,var(--color-brand-gold),rgba(212,175,55,0.2))] mb-[20px]"
+      style={{ width: `${width}px` }}
     />
   );
 }
 
 function SubTag({ children }: { children: React.ReactNode }) {
   return (
-    <p
-      style={{
-        fontFamily: "'Geist Sans', sans-serif",
-        fontSize: "10px",
-        letterSpacing: "0.28em",
-        textTransform: "uppercase",
-        color: GOLD_ALPHA(0.75),
-        margin: "0 0 10px 0",
-        fontWeight: 400,
-      }}
-    >
+    <p className="font-sans text-[10px] tracking-[0.28em] uppercase text-brand-gold/75 mb-[10px] font-normal">
       {children}
     </p>
   );
@@ -114,19 +94,7 @@ function SubTag({ children }: { children: React.ReactNode }) {
 
 function SectionHeadline({ children }: { children: React.ReactNode }) {
   return (
-    <h2
-      style={{
-        fontFamily: "'Playfair Display', 'Georgia', serif",
-        fontSize: "clamp(2rem, 4.5vw, 4.2rem)",
-        fontWeight: 700,
-        color: "#ffffff",
-        margin: "0 0 20px 0",
-        lineHeight: 1.1,
-        textShadow:
-          "0 0 60px rgba(0,0,0,0.95), 0 4px 40px rgba(0,0,0,0.9), 0 0 100px rgba(212,175,55,0.1)",
-        maxWidth: "620px",
-      }}
-    >
+    <h2 className="font-playfair text-[clamp(2rem,4.5vw,4.2rem)] font-bold text-white mb-[20px] leading-[1.1] max-w-[620px] [text-shadow:0_0_60px_rgba(0,0,0,0.95),0_4px_40px_rgba(0,0,0,0.9),0_0_100px_rgba(212,175,55,0.1)]">
       {children}
     </h2>
   );
@@ -134,18 +102,7 @@ function SectionHeadline({ children }: { children: React.ReactNode }) {
 
 function SectionBody({ children }: { children: React.ReactNode }) {
   return (
-    <p
-      style={{
-        fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-        fontSize: "clamp(1rem, 1.4vw, 1.25rem)",
-        lineHeight: 1.85,
-        color: WHITE_ALPHA(0.82),
-        margin: "0 0 28px 0",
-        maxWidth: "480px",
-        fontWeight: 400,
-        textShadow: "0 2px 20px rgba(0,0,0,0.9), 0 0 40px rgba(0,0,0,0.8)",
-      }}
-    >
+    <p className="font-cormorant text-[clamp(1rem,1.4vw,1.25rem)] leading-[1.85] text-white/80 mb-[28px] max-w-[480px] font-normal [text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_0_40px_rgba(0,0,0,0.8)]">
       {children}
     </p>
   );
@@ -155,47 +112,23 @@ function GoldButton({
   children,
   onClick,
   fullWidth = false,
+  type = "button"
 }: {
   children: React.ReactNode;
   onClick?: () => void;
   fullWidth?: boolean;
+  type?: "button" | "submit";
 }) {
-  const [hovered, setHovered] = useState(false);
   return (
     <button
-      type="button"
+      type={type}
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        pointerEvents: "auto",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "10px",
-        padding: "13px 32px",
-        width: fullWidth ? "100%" : undefined,
-        justifyContent: fullWidth ? "center" : undefined,
-        background: hovered
-          ? GOLD
-          : "rgba(0,0,0,0.3)",
-        border: `1px solid ${GOLD_ALPHA(hovered ? 1 : 0.55)}`,
-        color: hovered ? "#000000" : GOLD,
-        fontFamily: "'Geist Sans', sans-serif",
-        fontSize: "10px",
-        fontWeight: 600,
-        letterSpacing: "0.24em",
-        textTransform: "uppercase",
-        cursor: "pointer",
-        transition: "background 0.22s ease, color 0.22s ease, border-color 0.22s ease",
-        boxShadow: hovered
-          ? `0 4px 20px ${GOLD_ALPHA(0.3)}`
-          : "0 4px 24px rgba(0,0,0,0.5)",
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
-      }}
+      className={`pointer-events-auto inline-flex items-center gap-[10px] py-[13px] px-[32px] bg-black/30 border border-brand-gold/55 text-brand-gold font-sans text-[10px] font-semibold tracking-[0.24em] uppercase cursor-pointer transition-all duration-200 ease-in-out backdrop-blur-[8px] shadow-[0_4px_24px_rgba(0,0,0,0.5)] hover:bg-brand-gold hover:text-black hover:border-brand-gold hover:shadow-[0_4px_20px_rgba(212,175,55,0.3)] ${
+        fullWidth ? "w-full justify-center" : ""
+      } group`}
     >
       {children}
-      <span style={{ opacity: 0.7, fontSize: "10px" }}>→</span>
+      <span className="opacity-70 text-[10px] group-hover:text-black">→</span>
     </button>
   );
 }
@@ -213,33 +146,16 @@ function SectionShell({
   side = "right",
   verticalAlign = "center",
 }: SectionShellProps) {
-  const justifyMap = {
-    left: "flex-start",
-    right: "flex-end",
-    center: "center",
-  } as const;
-
-  const alignMap = {
-    center: "center",
-    bottom: "flex-end",
-    top: "flex-start",
-  } as const;
+  const justifyClass = 
+    side === "left" ? "justify-start" : 
+    side === "right" ? "justify-end" : "justify-center";
+    
+  const alignClass = 
+    verticalAlign === "top" ? "items-start" : 
+    verticalAlign === "bottom" ? "items-end pb-[clamp(60px,8vh,100px)]" : "items-center pb-[clamp(60px,8vh,80px)]";
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        alignItems: alignMap[verticalAlign],
-        justifyContent: justifyMap[side],
-        padding:
-          verticalAlign === "bottom"
-            ? "80px clamp(24px, 5.5vw, 80px) clamp(60px, 8vh, 100px)"
-            : "80px clamp(24px, 5.5vw, 80px) clamp(60px, 8vh, 80px)",
-        pointerEvents: "none",
-      }}
-    >
+    <div className={`absolute inset-0 flex px-[clamp(24px,5.5vw,80px)] pt-[80px] pointer-events-none ${alignClass} ${justifyClass}`}>
       {children}
     </div>
   );
@@ -255,13 +171,7 @@ interface ContentBlockProps {
 
 function ContentBlock({ children, animStyle, maxWidth = "540px" }: ContentBlockProps) {
   return (
-    <div
-      style={{
-        ...animStyle,
-        maxWidth,
-        width: "100%",
-      }}
-    >
+    <div style={{ ...animStyle, maxWidth, width: "100%" }}>
       {children}
     </div>
   );
@@ -413,65 +323,26 @@ function RoomsSection({
 
   return (
     <SectionShell side="center">
-      <div
-        style={{
-          ...animStyle,
-          width: "100%",
-          maxWidth: "680px",
-        }}
-      >
+      <div style={{ ...animStyle, width: "100%", maxWidth: "680px" }}>
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "clamp(16px, 2.5vh, 28px)" }}>
+        <div className="text-center mb-[clamp(16px,2.5vh,28px)]">
           <SubTag>ARRIVAL · OUR ROOMS &amp; FACILITIES</SubTag>
-          <h2
-            style={{
-              fontFamily: "'Playfair Display', 'Georgia', serif",
-              fontSize: "clamp(2rem, 4.2vw, 3.8rem)",
-              fontWeight: 700,
-              color: "#ffffff",
-              margin: "0 0 6px 0",
-              letterSpacing: "0.06em",
-              lineHeight: 1.08,
-              textShadow:
-                "0 0 60px rgba(0,0,0,0.98), 0 4px 40px rgba(0,0,0,0.9), 0 0 100px rgba(212,175,55,0.1)",
-            }}
-          >
+          <h2 className="font-playfair text-[clamp(2rem,4.2vw,3.8rem)] font-bold text-white mb-[6px] tracking-[0.06em] leading-[1.08] [text-shadow:0_0_60px_rgba(0,0,0,0.98),0_4px_40px_rgba(0,0,0,0.9),0_0_100px_rgba(212,175,55,0.1)]">
             Sleep Like You Were Born to This
           </h2>
-          <p
-            style={{
-              fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-              fontSize: "clamp(0.85rem, 1.2vw, 1rem)",
-              color: GOLD_ALPHA(0.7),
-              letterSpacing: "0.18em",
-              margin: 0,
-              textShadow: "0 2px 20px rgba(0,0,0,0.9)",
-            }}
-          >
+          <p className="font-cormorant text-[clamp(0.85rem,1.2vw,1rem)] text-brand-gold/70 tracking-[0.18em] m-0 [text-shadow:0_2px_20px_rgba(0,0,0,0.9)]">
             Luxury Rooms &amp; Suites
           </p>
         </div>
 
         {/* Divider */}
-        <div
-          style={{
-            height: "1px",
-            background: `linear-gradient(90deg, transparent, ${GOLD_ALPHA(0.3)}, transparent)`,
-            marginBottom: "clamp(14px, 2vh, 24px)",
-          }}
-        />
+        <div className="h-[1px] bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.3),transparent)] mb-[clamp(14px,2vh,24px)]" />
 
         {/* Tabs */}
         <div
           role="tablist"
           aria-label="Room categories"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "2px",
-            marginBottom: "clamp(14px, 2.5vh, 28px)",
-            pointerEvents: "auto",
-          }}
+          className="grid grid-cols-4 gap-[2px] mb-[clamp(14px,2.5vh,28px)] pointer-events-auto"
         >
           {ROOM_DATA.map((room) => {
             const isActive = activeTab === room.key;
@@ -483,29 +354,11 @@ function RoomsSection({
                 aria-controls={`room-panel-${room.key}`}
                 id={`room-tab-${room.key}`}
                 onClick={() => setActiveTab(room.key)}
-                style={{
-                  padding: "10px 6px",
-                  background: isActive
-                    ? "rgba(212,175,55,0.15)"
-                    : "rgba(0,0,0,0.2)",
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                  borderBottom: isActive
-                    ? `2px solid ${GOLD}`
-                    : "2px solid rgba(255,255,255,0.08)",
-                  borderTop: "none",
-                  borderLeft: "none",
-                  borderRight: "none",
-                  color: isActive ? GOLD : WHITE_ALPHA(0.45),
-                  fontFamily: "'Geist Sans', sans-serif",
-                  fontSize: "9px",
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                  transition: "all 0.25s ease",
-                  lineHeight: 1.4,
-                  textShadow: "0 2px 10px rgba(0,0,0,0.9)",
-                }}
+                className={`py-[10px] px-[6px] backdrop-blur-[12px] border-b-2 border-t-0 border-x-0 font-sans text-[9px] tracking-[0.18em] uppercase cursor-pointer transition-all duration-250 ease-in-out leading-[1.4] [text-shadow:0_2px_10px_rgba(0,0,0,0.9)] ${
+                  isActive
+                    ? "bg-brand-gold/15 border-brand-gold text-brand-gold"
+                    : "bg-black/20 border-white/10 text-white/45 hover:bg-black/30 hover:text-white/70"
+                }`}
               >
                 {room.name}
               </button>
@@ -519,29 +372,10 @@ function RoomsSection({
           role="tabpanel"
           aria-labelledby={`room-tab-${activeRoom.key}`}
         >
-          <p
-            style={{
-              fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-              fontSize: "clamp(1.1rem, 1.7vw, 1.4rem)",
-              color: GOLD_ALPHA(0.92),
-              fontStyle: "italic",
-              margin: "0 0 14px 0",
-              lineHeight: 1.4,
-              textShadow: "0 2px 20px rgba(0,0,0,0.9)",
-            }}
-          >
+          <p className="font-cormorant text-[clamp(1.1rem,1.7vw,1.4rem)] text-brand-gold/90 italic mb-[14px] leading-[1.4] [text-shadow:0_2px_20px_rgba(0,0,0,0.9)]">
             {activeRoom.tagline}
           </p>
-          <p
-            style={{
-              fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-              fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)",
-              color: WHITE_ALPHA(0.7),
-              lineHeight: 1.8,
-              margin: "0 0 24px 0",
-              textShadow: "0 2px 15px rgba(0,0,0,0.9)",
-            }}
-          >
+          <p className="font-cormorant text-[clamp(0.95rem,1.2vw,1.1rem)] text-white/70 leading-[1.8] mb-[24px] [text-shadow:0_2px_15px_rgba(0,0,0,0.9)]">
             {activeRoom.description}
           </p>
           <GoldButton
@@ -669,88 +503,23 @@ function ContactSection({ progress }: { progress: number }) {
     [form]
   );
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "10px 14px",
-    background: "rgba(0,0,0,0.35)",
-    backdropFilter: "blur(8px)",
-    border: `1px solid ${GOLD_ALPHA(0.2)}`,
-    color: "#ffffff",
-    fontFamily: "'Geist Sans', sans-serif",
-    fontSize: "12px",
-    outline: "none",
-    boxSizing: "border-box",
-    transition: "border-color 0.2s ease",
-  };
-
-  const labelStyle: React.CSSProperties = {
-    display: "block",
-    fontFamily: "'Geist Sans', sans-serif",
-    fontSize: "9px",
-    letterSpacing: "0.22em",
-    textTransform: "uppercase",
-    color: GOLD_ALPHA(0.65),
-    marginBottom: "5px",
-  };
+  const inputClass = "w-full py-[10px] px-[14px] bg-black/35 backdrop-blur-[8px] border border-brand-gold/20 text-white font-sans text-[12px] outline-none transition-colors duration-200 focus:border-brand-gold/50";
+  const labelClass = "block font-sans text-[9px] tracking-[0.22em] uppercase text-brand-gold/65 mb-[5px]";
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "72px clamp(20px, 5vw, 60px) clamp(60px, 8vh, 80px)",
-        pointerEvents: "none",
-      }}
-    >
+    <div className="absolute inset-0 flex items-center justify-center pt-[72px] px-[clamp(20px,5vw,60px)] pb-[clamp(60px,8vh,80px)] pointer-events-none">
       <div
-        style={{
-          ...animStyle,
-          width: "100%",
-          maxWidth: "860px",
-          display: "grid",
-          gridTemplateColumns: "1fr 1.15fr",
-          borderTop: `1px solid ${GOLD_ALPHA(0.2)}`,
-          borderBottom: `1px solid ${GOLD_ALPHA(0.06)}`,
-        }}
+        style={animStyle}
+        className="w-full max-w-[860px] grid grid-cols-1 md:grid-cols-[1fr_1.15fr] border-t border-brand-gold/20 border-b border-brand-gold/5"
       >
         {/* Left info */}
-        <div
-          style={{
-            padding: "clamp(24px, 3.5vw, 44px)",
-            borderRight: `1px solid ${GOLD_ALPHA(0.1)}`,
-            background: "rgba(0,0,0,0.2)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-          }}
-        >
+        <div className="p-[clamp(24px,3.5vw,44px)] border-r border-brand-gold/10 bg-black/20 backdrop-blur-[16px]">
           <SubTag>Contact Information</SubTag>
           <GoldRule width={40} />
-          <h2
-            style={{
-              fontFamily: "'Playfair Display', 'Georgia', serif",
-              fontSize: "clamp(1.5rem, 2.5vw, 2.2rem)",
-              fontWeight: 700,
-              color: "#ffffff",
-              margin: "0 0 14px 0",
-              lineHeight: 1.2,
-              textShadow: "0 2px 30px rgba(0,0,0,0.9)",
-            }}
-          >
+          <h2 className="font-playfair text-[clamp(1.5rem,2.5vw,2.2rem)] font-bold text-white mb-[14px] leading-[1.2] [text-shadow:0_2px_30px_rgba(0,0,0,0.9)]">
             Contact Us
           </h2>
-          <p
-            style={{
-              fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-              fontSize: "clamp(0.88rem, 1.1vw, 1rem)",
-              color: WHITE_ALPHA(0.65),
-              lineHeight: 1.72,
-              margin: "0 0 24px 0",
-              textShadow: "0 2px 15px rgba(0,0,0,0.9)",
-            }}
-          >
+          <p className="font-cormorant text-[clamp(0.88rem,1.1vw,1rem)] text-white/65 leading-[1.72] mb-[24px] [text-shadow:0_2px_15px_rgba(0,0,0,0.9)]">
             Have questions or need help with your booking? Our team is always
             ready to assist — feel free to contact us anytime.
           </p>
@@ -761,15 +530,15 @@ function ContactSection({ progress }: { progress: number }) {
             { icon: "🕐", label: "Hours", value: "24/7 Front Desk / Guest Relations" },
             { icon: "📍", label: "Address", value: "150 Ft. Ring Road, Nr. Sokhda Chowkdi, Rajkot - 360006, Gujarat" },
           ].map((item) => (
-            <div key={item.label} style={{ display: "flex", gap: "12px", marginBottom: "14px" }}>
-              <span style={{ fontSize: "12px", opacity: 0.6, marginTop: "2px", flexShrink: 0 }}>
+            <div key={item.label} className="flex gap-[12px] mb-[14px]">
+              <span className="text-[12px] opacity-60 mt-[2px] shrink-0">
                 {item.icon}
               </span>
               <div>
-                <p style={{ fontFamily: "'Geist Sans', sans-serif", fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: GOLD_ALPHA(0.5), margin: "0 0 2px 0" }}>
+                <p className="font-sans text-[8px] tracking-[0.22em] uppercase text-brand-gold/50 mb-[2px]">
                   {item.label}
                 </p>
-                <p style={{ fontFamily: "'Cormorant Garamond', 'Georgia', serif", fontSize: "clamp(0.82rem, 0.95vw, 0.92rem)", color: WHITE_ALPHA(0.78), margin: 0, lineHeight: 1.5, textShadow: "0 2px 10px rgba(0,0,0,0.9)" }}>
+                <p className="font-cormorant text-[clamp(0.82rem,0.95vw,0.92rem)] text-white/80 m-0 leading-[1.5] [text-shadow:0_2px_10px_rgba(0,0,0,0.9)]">
                   {item.value}
                 </p>
               </div>
@@ -778,79 +547,64 @@ function ContactSection({ progress }: { progress: number }) {
         </div>
 
         {/* Right form */}
-        <div
-          style={{
-            padding: "clamp(24px, 3.5vw, 44px)",
-            pointerEvents: "auto",
-            background: "rgba(0,0,0,0.25)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-          }}
-        >
+        <div className="p-[clamp(24px,3.5vw,44px)] pointer-events-auto bg-black/25 backdrop-blur-[20px]">
           <SubTag>* Get In Touch</SubTag>
           <GoldRule width={40} />
-          <h3
-            style={{
-              fontFamily: "'Playfair Display', 'Georgia', serif",
-              fontSize: "clamp(1.2rem, 2vw, 1.55rem)",
-              fontWeight: 700,
-              color: "#ffffff",
-              margin: "0 0 6px 0",
-              textShadow: "0 2px 20px rgba(0,0,0,0.9)",
-            }}
-          >
+          <h3 className="font-playfair text-[clamp(1.2rem,2vw,1.55rem)] font-bold text-white mb-[6px] [text-shadow:0_2px_20px_rgba(0,0,0,0.9)]">
             Get In Touch
           </h3>
-          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(0.82rem, 1vw, 0.92rem)", color: WHITE_ALPHA(0.5), margin: "0 0 20px 0", lineHeight: 1.6 }}>
+          <p className="font-cormorant text-[clamp(0.82rem,1vw,0.92rem)] text-white/50 mb-[20px] leading-[1.6]">
             We&apos;d love to hear about your travel plans.
           </p>
 
           {status === "success" ? (
-            <div style={{ padding: "28px", textAlign: "center", border: `1px solid ${GOLD_ALPHA(0.25)}` }}>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.25rem", color: GOLD, margin: "0 0 6px 0" }}>
+            <div className="p-[28px] text-center border border-brand-gold/25 bg-brand-gold/5">
+              <p className="font-playfair text-[1.25rem] text-brand-gold mb-[6px]">
                 Message Sent
               </p>
-              <p style={{ fontFamily: "'Cormorant Garamond', serif", color: WHITE_ALPHA(0.6), fontSize: "0.95rem", margin: 0 }}>
+              <p className="font-cormorant text-white/60 text-[0.95rem] m-0">
                 Our team will get back to you shortly.
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-[12px]">
               <div>
-                <label htmlFor="cs-name" style={labelStyle}>Name *</label>
-                <input id="cs-name" name="name" type="text" required autoComplete="name" value={form.name} onChange={handleChange} style={inputStyle} placeholder="Your full name" />
+                <label htmlFor="cs-name" className={labelClass}>Name *</label>
+                <input id="cs-name" name="name" type="text" required autoComplete="name" value={form.name} onChange={handleChange} className={inputClass} placeholder="Your full name" />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              <div className="grid grid-cols-2 gap-[10px]">
                 <div>
-                  <label htmlFor="cs-email" style={labelStyle}>Email *</label>
-                  <input id="cs-email" name="email" type="email" required autoComplete="email" value={form.email} onChange={handleChange} style={inputStyle} placeholder="you@example.com" />
+                  <label htmlFor="cs-email" className={labelClass}>Email *</label>
+                  <input id="cs-email" name="email" type="email" required autoComplete="email" value={form.email} onChange={handleChange} className={inputClass} placeholder="you@example.com" />
                 </div>
                 <div>
-                  <label htmlFor="cs-phone" style={labelStyle}>Phone *</label>
-                  <input id="cs-phone" name="phone" type="tel" required autoComplete="tel" value={form.phone} onChange={handleChange} style={inputStyle} placeholder="+91 00000 00000" />
+                  <label htmlFor="cs-phone" className={labelClass}>Phone *</label>
+                  <input id="cs-phone" name="phone" type="tel" required autoComplete="tel" value={form.phone} onChange={handleChange} className={inputClass} placeholder="+91 00000 00000" />
                 </div>
               </div>
               <div>
-                <label htmlFor="cs-service" style={labelStyle}>Service Interested In</label>
-                <select id="cs-service" name="service" value={form.service} onChange={handleChange} style={{ ...inputStyle, cursor: "pointer" }}>
-                  <option value="">Select a service…</option>
+                <label htmlFor="cs-service" className={labelClass}>Service Interested In</label>
+                <select id="cs-service" name="service" value={form.service} onChange={handleChange} className={`${inputClass} cursor-pointer`}>
+                  <option value="" className="bg-[#111]">Select a service…</option>
                   {SERVICE_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt} style={{ background: "#111" }}>{opt}</option>
+                    <option key={opt} value={opt} className="bg-[#111]">{opt}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label htmlFor="cs-message" style={labelStyle}>Message *</label>
-                <textarea id="cs-message" name="message" required rows={3} value={form.message} onChange={handleChange} style={{ ...inputStyle, resize: "vertical", lineHeight: "1.6" }} placeholder="Tell us about your plans…" />
+                <label htmlFor="cs-message" className={labelClass}>Message *</label>
+                <textarea id="cs-message" name="message" required rows={3} value={form.message} onChange={handleChange} className={`${inputClass} resize-y leading-[1.6]`} placeholder="Tell us about your plans…" />
               </div>
               {status === "error" && (
-                <p style={{ fontFamily: "'Geist Sans', sans-serif", fontSize: "10px", color: "rgba(255,100,100,0.85)", margin: 0 }}>
+                <p className="font-sans text-[10px] text-[#ff6464] m-0">
                   Please fill in all required fields with valid information.
                 </p>
               )}
-              <GoldButton fullWidth>
-                {status === "submitting" ? "Sending…" : "Send Message"}
-              </GoldButton>
+              <div className="mt-[4px]">
+                <GoldButton fullWidth type="submit">
+                  {status === "submitting" ? "Sending…" : "Send Message"}
+                </GoldButton>
+              </div>
             </form>
           )}
         </div>

@@ -40,10 +40,6 @@ const GALLERY_IMAGES = [
 
 const CATEGORIES = ["All", "Lobby", "Dining", "Rooms", "Banquet", "Exterior", "Amenities"];
 
-const GOLD = "#d4af37";
-const GOLD_ALPHA = (a: number) => `rgba(212,175,55,${a})`;
-const WHITE_ALPHA = (a: number) => `rgba(255,255,255,${a})`;
-
 // ─── Lightbox ─────────────────────────────────────────────────────────────────
 
 interface LightboxProps {
@@ -82,34 +78,17 @@ function Lightbox({ image, images, onClose, onNavigate }: LightboxProps) {
       aria-modal="true"
       aria-label={`Gallery: ${image.alt}`}
       onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 1000,
-        background: "rgba(0,0,0,0.96)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        animation: "lbFadeIn 0.25s ease forwards",
-      }}
+      className="fixed inset-0 z-1000 bg-black/95 backdrop-blur-[24px] flex items-center justify-center animate-[lbFadeIn_0.25s_ease_forwards]"
     >
+      <style>{`
+        @keyframes lbFadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+      `}</style>
+
       {/* Counter */}
-      <div
-        style={{
-          position: "absolute",
-          top: "24px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          fontFamily: "'Geist Sans', sans-serif",
-          fontSize: "10px",
-          letterSpacing: "0.35em",
-          color: GOLD_ALPHA(0.7),
-          textTransform: "uppercase",
-          userSelect: "none",
-        }}
-      >
+      <div className="absolute top-[24px] left-1/2 -translate-x-1/2 font-sans text-[10px] tracking-[0.35em] text-brand-gold/70 uppercase select-none">
         {currentIndex + 1} / {images.length}
       </div>
 
@@ -118,35 +97,7 @@ function Lightbox({ image, images, onClose, onNavigate }: LightboxProps) {
         type="button"
         aria-label="Close lightbox (Escape)"
         onClick={onClose}
-        style={{
-          position: "absolute",
-          top: "20px",
-          right: "24px",
-          background: "rgba(0,0,0,0.5)",
-          border: `1px solid ${GOLD_ALPHA(0.35)}`,
-          color: GOLD,
-          width: "44px",
-          height: "44px",
-          borderRadius: "50%",
-          cursor: "pointer",
-          fontSize: "22px",
-          lineHeight: 1,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "all 0.2s ease",
-          zIndex: 10,
-        }}
-        onMouseEnter={(e) => {
-          const b = e.currentTarget as HTMLButtonElement;
-          b.style.background = GOLD;
-          b.style.color = "#000";
-        }}
-        onMouseLeave={(e) => {
-          const b = e.currentTarget as HTMLButtonElement;
-          b.style.background = "rgba(0,0,0,0.5)";
-          b.style.color = GOLD;
-        }}
+        className="absolute top-[20px] right-[24px] bg-black/50 border border-brand-gold/35 text-brand-gold w-[44px] h-[44px] rounded-full cursor-pointer text-[22px] leading-none flex items-center justify-center transition-colors duration-200 z-10 hover:bg-brand-gold hover:text-black"
       >
         ×
       </button>
@@ -156,29 +107,7 @@ function Lightbox({ image, images, onClose, onNavigate }: LightboxProps) {
         type="button"
         aria-label="Previous image (←)"
         onClick={(e) => { e.stopPropagation(); goPrev(); }}
-        style={{
-          position: "absolute",
-          left: "20px",
-          background: "rgba(0,0,0,0.5)",
-          border: `1px solid ${GOLD_ALPHA(0.25)}`,
-          color: GOLD,
-          width: "52px",
-          height: "52px",
-          borderRadius: "50%",
-          cursor: "pointer",
-          fontSize: "24px",
-          lineHeight: 1,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "all 0.2s ease",
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.background = GOLD_ALPHA(0.2);
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.background = "rgba(0,0,0,0.5)";
-        }}
+        className="absolute left-[20px] bg-black/50 border border-brand-gold/25 text-brand-gold w-[52px] h-[52px] rounded-full cursor-pointer text-[24px] leading-none flex items-center justify-center transition-colors duration-200 hover:bg-brand-gold/20"
       >
         ‹
       </button>
@@ -186,44 +115,20 @@ function Lightbox({ image, images, onClose, onNavigate }: LightboxProps) {
       {/* Image */}
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: "90vw", maxHeight: "85vh", position: "relative" }}
+        className="max-w-[90vw] max-h-[85vh] relative"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={image.src}
           alt={image.alt}
-          style={{
-            maxWidth: "90vw",
-            maxHeight: "80vh",
-            objectFit: "contain",
-            display: "block",
-            border: `1px solid ${GOLD_ALPHA(0.15)}`,
-            boxShadow: `0 0 80px rgba(0,0,0,0.9)`,
-          }}
+          className="max-w-[90vw] max-h-[80vh] object-contain block border border-brand-gold/15 drop-shadow-[0_0_80px_rgba(0,0,0,0.9)]"
         />
         {/* Caption */}
-        <div style={{ marginTop: "14px", textAlign: "center" }}>
-          <p
-            style={{
-              fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-              fontSize: "clamp(0.9rem, 1.2vw, 1.05rem)",
-              color: WHITE_ALPHA(0.72),
-              margin: "0 0 4px 0",
-              fontStyle: "italic",
-            }}
-          >
+        <div className="mt-[14px] text-center">
+          <p className="font-cormorant text-[clamp(0.9rem,1.2vw,1.05rem)] text-white/70 mb-[4px] italic">
             {image.alt}
           </p>
-          <p
-            style={{
-              fontFamily: "'Geist Sans', sans-serif",
-              fontSize: "9px",
-              letterSpacing: "0.3em",
-              color: GOLD_ALPHA(0.6),
-              margin: 0,
-              textTransform: "uppercase",
-            }}
-          >
+          <p className="font-sans text-[9px] tracking-[0.3em] text-brand-gold/60 m-0 uppercase">
             {image.category}
           </p>
         </div>
@@ -234,39 +139,10 @@ function Lightbox({ image, images, onClose, onNavigate }: LightboxProps) {
         type="button"
         aria-label="Next image (→)"
         onClick={(e) => { e.stopPropagation(); goNext(); }}
-        style={{
-          position: "absolute",
-          right: "20px",
-          background: "rgba(0,0,0,0.5)",
-          border: `1px solid ${GOLD_ALPHA(0.25)}`,
-          color: GOLD,
-          width: "52px",
-          height: "52px",
-          borderRadius: "50%",
-          cursor: "pointer",
-          fontSize: "24px",
-          lineHeight: 1,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "all 0.2s ease",
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.background = GOLD_ALPHA(0.2);
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.background = "rgba(0,0,0,0.5)";
-        }}
+        className="absolute right-[20px] bg-black/50 border border-brand-gold/25 text-brand-gold w-[52px] h-[52px] rounded-full cursor-pointer text-[24px] leading-none flex items-center justify-center transition-colors duration-200 hover:bg-brand-gold/20"
       >
         ›
       </button>
-
-      <style>{`
-        @keyframes lbFadeIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 }
@@ -279,112 +155,37 @@ interface ThumbnailProps {
 }
 
 function GalleryThumbnail({ image, onClick }: ThumbnailProps) {
-  const [hovered, setHovered] = useState(false);
-
   return (
     <button
       type="button"
       aria-label={`View full size: ${image.alt}`}
       onClick={() => onClick(image.id)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: "none",
-        border: "none",
-        padding: 0,
-        cursor: "pointer",
-        position: "relative",
-        overflow: "hidden",
-        aspectRatio: "4/3",
-        display: "block",
-        width: "100%",
-        transform: hovered ? "scale(1.02)" : "scale(1)",
-        transition: "transform 0.4s cubic-bezier(0.34,1.56,0.64,1)",
-        outline: hovered ? `1px solid ${GOLD_ALPHA(0.6)}` : "1px solid transparent",
-        outlineOffset: "0px",
-      }}
+      className="group bg-transparent border-none p-0 cursor-pointer relative overflow-hidden aspect-[4/3] block w-full outline outline-1 outline-transparent outline-offset-0 transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.02] hover:outline-brand-gold/60"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={image.src}
         alt={image.alt}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          display: "block",
-          filter: hovered ? "brightness(1.08)" : "brightness(0.8)",
-          transition: "filter 0.4s ease, transform 0.4s ease",
-          transform: hovered ? "scale(1.05)" : "scale(1)",
-        }}
+        className="w-full h-full object-cover block filter brightness-80 transition-all duration-400 ease-in-out group-hover:brightness-[1.08] group-hover:scale-[1.05]"
       />
 
       {/* Hover overlay */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: hovered
-            ? "linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.75) 100%)"
-            : "transparent",
-          transition: "background 0.3s ease",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-end",
-          padding: "14px",
-        }}
-      >
-        {hovered && (
-          <>
-            <p
-              style={{
-                fontFamily: "'Geist Sans', sans-serif",
-                fontSize: "8px",
-                letterSpacing: "0.25em",
-                color: GOLD_ALPHA(0.9),
-                textTransform: "uppercase",
-                margin: "0 0 3px 0",
-              }}
-            >
-              {image.category}
-            </p>
-            <p
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize: "clamp(0.8rem, 1.1vw, 1rem)",
-                color: WHITE_ALPHA(0.9),
-                margin: 0,
-                lineHeight: 1.3,
-                fontStyle: "italic",
-              }}
-            >
-              {image.alt}
-            </p>
-          </>
-        )}
+      <div className="absolute inset-0 bg-transparent transition-colors duration-300 ease-in-out flex flex-col justify-end p-[14px] opacity-0 group-hover:bg-[linear-gradient(180deg,transparent_40%,rgba(0,0,0,0.75)_100%)] group-hover:opacity-100">
+        <p className="font-sans text-[8px] tracking-[0.25em] text-brand-gold/90 uppercase mb-[3px]">
+          {image.category}
+        </p>
+        <p className="font-cormorant text-[clamp(0.8rem,1.1vw,1rem)] text-white/90 m-0 leading-[1.3] italic">
+          {image.alt}
+        </p>
       </div>
 
       {/* Expand icon */}
-      {hovered && (
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            top: "12px",
-            right: "12px",
-            width: "32px",
-            height: "32px",
-            border: `1px solid ${GOLD_ALPHA(0.7)}`,
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "rgba(0,0,0,0.5)",
-          }}
-        >
-          <span style={{ color: GOLD, fontSize: "14px", lineHeight: 1 }}>⊕</span>
-        </div>
-      )}
+      <div
+        aria-hidden="true"
+        className="absolute top-[12px] right-[12px] w-[32px] h-[32px] border border-brand-gold/70 rounded-full flex items-center justify-center bg-black/50 opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100"
+      >
+        <span className="text-brand-gold text-[14px] leading-none">⊕</span>
+      </div>
     </button>
   );
 }
@@ -412,59 +213,24 @@ export function GallerySection() {
     <section
       id="gallery"
       aria-labelledby="gallery-heading"
-      style={{
-        background: "#0a0a0a",
-        padding: "clamp(60px, 10vh, 112px) clamp(20px, 5vw, 72px)",
-        borderTop: `1px solid ${GOLD_ALPHA(0.14)}`,
-      }}
+      className="bg-[#0a0a0a] px-[clamp(20px,5vw,72px)] py-[clamp(60px,10vh,112px)] border-t border-brand-gold/15"
     >
       {/* Header */}
-      <div style={{ textAlign: "center", marginBottom: "clamp(36px, 6vh, 64px)" }}>
-        <p
-          style={{
-            fontFamily: "'Geist Sans', sans-serif",
-            fontSize: "10px",
-            letterSpacing: "0.48em",
-            textTransform: "uppercase",
-            color: GOLD_ALPHA(0.7),
-            margin: "0 0 16px 0",
-          }}
-        >
+      <div className="text-center mb-[clamp(36px,6vh,64px)]">
+        <p className="font-sans text-[10px] tracking-[0.48em] uppercase text-brand-gold/70 mb-[16px]">
           VISUAL STORY
         </p>
         <div
           aria-hidden="true"
-          style={{
-            width: "1px",
-            height: "48px",
-            background: `linear-gradient(180deg, transparent, ${GOLD}, transparent)`,
-            margin: "0 auto 20px",
-          }}
+          className="w-[1px] h-[48px] bg-[linear-gradient(180deg,transparent,var(--color-brand-gold),transparent)] mx-auto mb-[20px]"
         />
         <h2
           id="gallery-heading"
-          style={{
-            fontFamily: "'Playfair Display', 'Georgia', serif",
-            fontSize: "clamp(2rem, 4.5vw, 4rem)",
-            fontWeight: 700,
-            color: "#ffffff",
-            margin: "0 0 18px 0",
-            lineHeight: 1.1,
-            letterSpacing: "0.04em",
-          }}
+          className="font-playfair text-[clamp(2rem,4.5vw,4rem)] font-bold text-white mb-[18px] leading-[1.1] tracking-[0.04em]"
         >
           Through Our Lens
         </h2>
-        <p
-          style={{
-            fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-            fontSize: "clamp(1rem, 1.4vw, 1.2rem)",
-            color: WHITE_ALPHA(0.55),
-            margin: "0 auto",
-            maxWidth: "520px",
-            lineHeight: 1.8,
-          }}
-        >
+        <p className="font-cormorant text-[clamp(1rem,1.4vw,1.2rem)] text-white/55 mx-auto max-w-[520px] leading-[1.8]">
           Every corner of The Blackstone tells a story of craft, elegance, and
           a commitment to the extraordinary. Step inside.
         </p>
@@ -474,13 +240,7 @@ export function GallerySection() {
       <div
         role="tablist"
         aria-label="Gallery filter"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "4px",
-          flexWrap: "wrap",
-          marginBottom: "clamp(28px, 5vh, 52px)",
-        }}
+        className="flex justify-center gap-[4px] flex-wrap mb-[clamp(28px,5vh,52px)]"
       >
         {CATEGORIES.map((cat) => {
           const isActive = cat === activeCategory;
@@ -491,18 +251,11 @@ export function GallerySection() {
               aria-selected={isActive}
               type="button"
               onClick={() => setActiveCategory(cat)}
-              style={{
-                padding: "8px 20px",
-                background: isActive ? GOLD_ALPHA(0.14) : "transparent",
-                border: `1px solid ${isActive ? GOLD_ALPHA(0.7) : GOLD_ALPHA(0.14)}`,
-                color: isActive ? GOLD : WHITE_ALPHA(0.45),
-                fontFamily: "'Geist Sans', sans-serif",
-                fontSize: "9px",
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
+              className={`py-[8px] px-[20px] font-sans text-[9px] tracking-[0.22em] uppercase cursor-pointer transition-colors duration-200 ${
+                isActive 
+                  ? "bg-brand-gold/15 border border-brand-gold/70 text-brand-gold" 
+                  : "bg-transparent border border-brand-gold/15 text-white/45 hover:border-brand-gold/40 hover:text-white/80"
+              }`}
             >
               {cat}
             </button>
@@ -511,15 +264,7 @@ export function GallerySection() {
       </div>
 
       {/* Image Grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(clamp(200px, 26vw, 320px), 1fr))",
-          gap: "3px",
-          maxWidth: "1400px",
-          margin: "0 auto",
-        }}
-      >
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(clamp(200px,26vw,320px),1fr))] gap-[3px] max-w-[1400px] mx-auto">
         {filtered.map((img) => (
           <GalleryThumbnail
             key={img.id}

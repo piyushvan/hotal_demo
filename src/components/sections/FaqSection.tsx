@@ -2,10 +2,6 @@
 
 import React, { useState } from "react";
 
-const GOLD = "#d4af37";
-const GOLD_ALPHA = (a: number) => `rgba(212,175,55,${a})`;
-const WHITE_ALPHA = (a: number) => `rgba(255,255,255,${a})`;
-
 const FAQ_DATA = [
   {
     id: "faq-1",
@@ -67,14 +63,11 @@ interface FAQItemProps {
 }
 
 function FAQItem({ id, question, answer, isOpen, onToggle, index }: FAQItemProps) {
-  const [hovered, setHovered] = useState(false);
-
   return (
     <div
-      style={{
-        borderBottom: `1px solid ${GOLD_ALPHA(isOpen ? 0.18 : 0.08)}`,
-        transition: "border-color 0.3s ease",
-      }}
+      className={`border-b transition-colors duration-300 ease-in-out ${
+        isOpen ? "border-brand-gold/20" : "border-brand-gold/10"
+      }`}
     >
       <button
         id={`${id}-btn`}
@@ -82,76 +75,34 @@ function FAQItem({ id, question, answer, isOpen, onToggle, index }: FAQItemProps
         aria-expanded={isOpen}
         aria-controls={`${id}-panel`}
         onClick={() => onToggle(id)}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        style={{
-          width: "100%",
-          background: isOpen
-            ? "rgba(212,175,55,0.03)"
-            : hovered
-            ? "rgba(255,255,255,0.01)"
-            : "transparent",
-          border: "none",
-          padding: "clamp(18px, 2.5vh, 28px) 0",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "24px",
-          cursor: "pointer",
-          textAlign: "left",
-          transition: "background 0.2s ease",
-        }}
+        className={`w-full py-[clamp(18px,2.5vh,28px)] flex items-center justify-between gap-[24px] cursor-pointer text-left transition-colors duration-200 ease-in-out border-none group ${
+          isOpen ? "bg-brand-gold/[0.03]" : "bg-transparent hover:bg-white/[0.01]"
+        }`}
       >
-        <div style={{ display: "flex", alignItems: "flex-start", gap: "20px", flex: 1 }}>
-          <span
-            style={{
-              fontFamily: "'Geist Sans', sans-serif",
-              fontSize: "9px",
-              letterSpacing: "0.2em",
-              color: GOLD_ALPHA(0.5),
-              flexShrink: 0,
-              marginTop: "4px",
-              minWidth: "28px",
-            }}
-          >
+        <div className="flex items-start gap-[20px] flex-1">
+          <span className="font-sans text-[9px] tracking-[0.2em] text-brand-gold/50 shrink-0 mt-[4px] min-w-[28px]">
             {String(index + 1).padStart(2, "0")}
           </span>
           <span
-            style={{
-              fontFamily: "'Playfair Display', 'Georgia', serif",
-              fontSize: "clamp(1rem, 1.4vw, 1.25rem)",
-              fontWeight: 600,
-              color: isOpen ? "#ffffff" : WHITE_ALPHA(0.75),
-              lineHeight: 1.3,
-              transition: "color 0.2s ease",
-            }}
+            className={`font-playfair text-[clamp(1rem,1.4vw,1.25rem)] font-semibold leading-[1.3] transition-colors duration-200 ease-in-out ${
+              isOpen ? "text-white" : "text-white/75"
+            }`}
           >
             {question}
           </span>
         </div>
         <div
           aria-hidden="true"
-          style={{
-            width: "28px",
-            height: "28px",
-            border: `1px solid ${GOLD_ALPHA(isOpen ? 0.6 : 0.2)}`,
-            borderRadius: "50%",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "all 0.3s ease",
-            transform: isOpen ? "rotate(45deg)" : "rotate(0deg)",
-            background: isOpen ? GOLD_ALPHA(0.12) : "transparent",
-          }}
+          className={`w-[28px] h-[28px] rounded-full shrink-0 flex items-center justify-center transition-all duration-300 ease-in-out border ${
+            isOpen 
+              ? "border-brand-gold/60 bg-brand-gold/10 rotate-45" 
+              : "border-brand-gold/20 bg-transparent rotate-0"
+          }`}
         >
           <span
-            style={{
-              color: isOpen ? GOLD : WHITE_ALPHA(0.4),
-              fontSize: "16px",
-              lineHeight: 1,
-              fontWeight: 300,
-            }}
+            className={`text-[16px] leading-none font-light ${
+              isOpen ? "text-brand-gold" : "text-white/40"
+            }`}
           >
             +
           </span>
@@ -163,27 +114,12 @@ function FAQItem({ id, question, answer, isOpen, onToggle, index }: FAQItemProps
         id={`${id}-panel`}
         role="region"
         aria-labelledby={`${id}-btn`}
-        style={{
-          maxHeight: isOpen ? "400px" : "0",
-          overflow: "hidden",
-          transition: "max-height 0.45s cubic-bezier(0.4,0,0.2,1)",
-        }}
+        className={`overflow-hidden transition-all duration-[450ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          isOpen ? "max-h-[400px]" : "max-h-0"
+        }`}
       >
-        <div
-          style={{
-            paddingBottom: "clamp(18px, 2.5vh, 28px)",
-            paddingLeft: "48px",
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-              fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)",
-              color: WHITE_ALPHA(0.65),
-              lineHeight: 1.85,
-              margin: 0,
-            }}
-          >
+        <div className="pb-[clamp(18px,2.5vh,28px)] pl-[48px]">
+          <p className="font-cormorant text-[clamp(0.95rem,1.2vw,1.1rem)] text-white/65 leading-[1.85] m-0">
             {answer}
           </p>
         </div>
@@ -203,76 +139,29 @@ export function FaqSection() {
     <section
       id="faq"
       aria-labelledby="faq-heading"
-      style={{
-        background: "#080808",
-        padding: "clamp(64px, 10vh, 120px) clamp(24px, 6vw, 80px)",
-        borderTop: `1px solid ${GOLD_ALPHA(0.1)}`,
-      }}
+      className="bg-[#080808] px-[clamp(24px,6vw,80px)] py-[clamp(64px,10vh,120px)] border-t border-brand-gold/10"
     >
-      <div
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-        }}
-      >
+      <div className="max-w-[900px] mx-auto">
         {/* Header */}
-        <div style={{ marginBottom: "clamp(40px, 6vh, 64px)" }}>
-          <p
-            style={{
-              fontFamily: "'Geist Sans', sans-serif",
-              fontSize: "10px",
-              letterSpacing: "0.45em",
-              textTransform: "uppercase",
-              color: GOLD_ALPHA(0.7),
-              margin: "0 0 14px 0",
-            }}
-          >
+        <div className="mb-[clamp(40px,6vh,64px)]">
+          <p className="font-sans text-[10px] tracking-[0.45em] uppercase text-brand-gold/70 mb-[14px]">
             GUEST ENQUIRIES
           </p>
-          <div
-            style={{
-              width: "40px",
-              height: "1px",
-              background: GOLD,
-              marginBottom: "20px",
-            }}
-          />
+          <div className="w-[40px] h-[1px] bg-brand-gold mb-[20px]" />
           <h2
             id="faq-heading"
-            style={{
-              fontFamily: "'Playfair Display', 'Georgia', serif",
-              fontSize: "clamp(2rem, 4.5vw, 3.8rem)",
-              fontWeight: 700,
-              color: "#ffffff",
-              margin: "0 0 16px 0",
-              lineHeight: 1.1,
-            }}
+            className="font-playfair text-[clamp(2rem,4.5vw,3.8rem)] font-bold text-white mb-[16px] leading-[1.1]"
           >
             Frequently Asked Questions
           </h2>
-          <p
-            style={{
-              fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-              fontSize: "clamp(1rem, 1.3vw, 1.15rem)",
-              color: WHITE_ALPHA(0.55),
-              margin: 0,
-              lineHeight: 1.75,
-              maxWidth: "560px",
-            }}
-          >
+          <p className="font-cormorant text-[clamp(1rem,1.3vw,1.15rem)] text-white/55 m-0 leading-[1.75] max-w-[560px]">
             Everything you need to know before your stay. Can&apos;t find your
             answer? Our concierge team is always ready to help.
           </p>
         </div>
 
         {/* Divider */}
-        <div
-          style={{
-            height: "1px",
-            background: `linear-gradient(90deg, ${GOLD_ALPHA(0.4)}, transparent)`,
-            marginBottom: "clamp(8px, 1.5vh, 16px)",
-          }}
-        />
+        <div className="h-[1px] bg-[linear-gradient(90deg,rgba(212,175,55,0.4),transparent)] mb-[clamp(8px,1.5vh,16px)]" />
 
         {/* FAQ list */}
         <div>
@@ -290,69 +179,18 @@ export function FaqSection() {
         </div>
 
         {/* CTA */}
-        <div
-          style={{
-            marginTop: "clamp(40px, 6vh, 64px)",
-            padding: "clamp(24px, 3.5vh, 40px)",
-            background: "rgba(212,175,55,0.04)",
-            border: `1px solid ${GOLD_ALPHA(0.15)}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "20px",
-          }}
-        >
+        <div className="mt-[clamp(40px,6vh,64px)] p-[clamp(24px,3.5vh,40px)] bg-brand-gold/5 border border-brand-gold/15 flex items-center justify-between flex-wrap gap-[20px]">
           <div>
-            <p
-              style={{
-                fontFamily: "'Playfair Display', 'Georgia', serif",
-                fontSize: "clamp(1.1rem, 1.6vw, 1.4rem)",
-                fontWeight: 600,
-                color: "#ffffff",
-                margin: "0 0 6px 0",
-              }}
-            >
+            <p className="font-playfair text-[clamp(1.1rem,1.6vw,1.4rem)] font-semibold text-white mb-[6px]">
               Still have questions?
             </p>
-            <p
-              style={{
-                fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-                fontSize: "clamp(0.9rem, 1.1vw, 1rem)",
-                color: WHITE_ALPHA(0.55),
-                margin: 0,
-              }}
-            >
+            <p className="font-cormorant text-[clamp(0.9rem,1.1vw,1rem)] text-white/55 m-0">
               Our team is available 24/7 to assist you.
             </p>
           </div>
           <a
             href="tel:+918238282341"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "12px 28px",
-              background: "transparent",
-              border: `1px solid ${GOLD_ALPHA(0.55)}`,
-              color: GOLD,
-              fontFamily: "'Geist Sans', sans-serif",
-              fontSize: "10px",
-              fontWeight: 600,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              textDecoration: "none",
-              transition: "all 0.22s ease",
-              cursor: "pointer",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.background = GOLD;
-              (e.currentTarget as HTMLAnchorElement).style.color = "#000000";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
-              (e.currentTarget as HTMLAnchorElement).style.color = GOLD;
-            }}
+            className="inline-flex items-center gap-[10px] py-[12px] px-[28px] bg-transparent border border-brand-gold/55 text-brand-gold font-sans text-[10px] font-semibold tracking-[0.22em] uppercase no-underline transition-colors duration-200 ease-in-out cursor-pointer hover:bg-brand-gold hover:text-[#000000]"
           >
             Call Us Now →
           </a>
