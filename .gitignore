@@ -45,5 +45,10 @@ CLAUDE.md
 AGENTS.md
 /blueprints/
 
-# generated large assets
+# generated large assets (not deployed)
 /public/master_frames/
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
