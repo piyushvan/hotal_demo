@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -177,6 +177,55 @@ function ContentBlock({ children, animStyle, maxWidth = "540px" }: ContentBlockP
   );
 }
 
+// ─── Custom Animation for Reception (Video 2) ───────────────────────────────
+function useReceptionAnimation(progress: number): React.CSSProperties {
+  return useMemo(() => {
+    let opacity = 0;
+    let translateX = 0;
+    let translateY = 0;
+    let scale = 0.85; // Text slightly smaller overall as requested
+    let blur = 0;
+
+    if (progress < 0.1) {
+      // 0 to 1s (0.0 to 0.1): Invisible
+      opacity = 0;
+      blur = 10;
+      translateY = 20;
+    } else if (progress < 0.2) {
+      // 1s to 2s (0.1 to 0.2): Fade in and clear
+      const t = (progress - 0.1) / 0.1;
+      opacity = t;
+      blur = 10 * (1 - t);
+      translateY = 20 * (1 - t);
+    } else if (progress < 0.5) {
+      // 2s to 5s (0.2 to 0.5): Move right relative to starting position
+      const t = (progress - 0.2) / 0.3;
+      opacity = 1;
+      translateX = t * 80; // Drift smoothly right by 80px
+      blur = 0;
+    } else if (progress < 0.6) {
+      // 5s to 6s (0.5 to 0.6): Fade out with animation
+      const t = (progress - 0.5) / 0.1;
+      opacity = 1 - t;
+      blur = t * 15;
+      scale = 0.85 + t * 0.08; // slightly scale up while fading
+      translateX = 80 + t * 30; // continue drifting
+    } else {
+      // After 6s: completely gone (before the camera starts walking around the corner)
+      opacity = 0;
+      blur = 10;
+    }
+
+    return {
+      opacity,
+      transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
+      transformOrigin: "right center", // Keep scaling anchored to the right since it's on the right side
+      filter: blur > 0.5 ? `blur(${blur}px)` : "none",
+      willChange: "opacity, transform, filter",
+    };
+  }, [progress]);
+}
+
 // ─── Chapter 1 → Reception ────────────────────────────────────────────────────
 
 function ReceptionSection({
@@ -186,7 +235,7 @@ function ReceptionSection({
   progress: number;
   onBookingRequest?: (ctx: string) => void;
 }) {
-  const animStyle = useCinematicText(progress, { approachEnd: 0.2, readingEnd: 0.72 });
+  const animStyle = useReceptionAnimation(progress);
 
   return (
     <SectionShell side="right">
@@ -209,6 +258,50 @@ function ReceptionSection({
   );
 }
 
+// ─── Custom Animation for Dining (Video 3) ──────────────────────────────────
+function useDiningAnimation(progress: number): React.CSSProperties {
+  return useMemo(() => {
+    let opacity = 0;
+    let translateX = 0;
+    let translateY = 0;
+    let scale = 0.85; // Keeping text smaller for consistency
+    let blur = 0;
+
+    if (progress < 0.1) {
+      // 0 to 1s (0.0 to 0.1): Fade in
+      const t = progress / 0.1;
+      opacity = t;
+      blur = 10 * (1 - t);
+      translateY = 20 * (1 - t);
+    } else if (progress < 0.5) {
+      // 1s to 5s (0.1 to 0.5): Stay visible, very subtle drift left
+      const t = (progress - 0.1) / 0.4;
+      opacity = 1;
+      translateX = -(t * 20); // drift left slightly
+      blur = 0;
+    } else if (progress < 0.7) {
+      // 5s to 7s (0.5 to 0.7): Fade out towards the left side
+      const t = (progress - 0.5) / 0.2;
+      opacity = 1 - t;
+      blur = t * 15;
+      scale = 0.85 + t * 0.05; // slightly scale up while fading
+      translateX = -20 - (t * 80); // move strongly left while fading
+    } else {
+      // After 7s: completely gone
+      opacity = 0;
+      blur = 10;
+    }
+
+    return {
+      opacity,
+      transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
+      transformOrigin: "left center", // Anchored to the left
+      filter: blur > 0.5 ? `blur(${blur}px)` : "none",
+      willChange: "opacity, transform, filter",
+    };
+  }, [progress]);
+}
+
 // ─── Chapter 2 → Dining ───────────────────────────────────────────────────────
 
 function DiningSection({
@@ -218,7 +311,7 @@ function DiningSection({
   progress: number;
   onBookingRequest?: (ctx: string) => void;
 }) {
-  const animStyle = useCinematicText(progress, { approachEnd: 0.2, readingEnd: 0.72 });
+  const animStyle = useDiningAnimation(progress);
 
   return (
     <SectionShell side="left">
@@ -307,6 +400,39 @@ const ROOM_DATA = [
   },
 ] as const;
 
+// ─── Custom Animation for Rooms ───────────────────────────────────────────────
+function useRoomsAnimation(progress: number): React.CSSProperties {
+  return useMemo(() => {
+    let opacity = 0;
+    let translateY = 0;
+    const scale = 0.85; // Significantly smaller
+    let blur = 0;
+
+    if (progress < 0.15) {
+      const t = progress / 0.15;
+      opacity = t;
+      blur = 10 * (1 - t);
+      translateY = 20 * (1 - t);
+    } else if (progress < 0.85) {
+      opacity = 1;
+      blur = 0;
+    } else {
+      const t = (progress - 0.85) / 0.15;
+      opacity = 1 - t;
+      blur = t * 10;
+      translateY = -(t * 20);
+    }
+
+    return {
+      opacity,
+      transform: `translateY(${translateY}px) scale(${scale})`,
+      transformOrigin: "left center",
+      filter: blur > 0.5 ? `blur(${blur}px)` : "none",
+      willChange: "opacity, transform, filter",
+    };
+  }, [progress]);
+}
+
 function RoomsSection({
   progress,
   onBookingRequest,
@@ -314,76 +440,110 @@ function RoomsSection({
   progress: number;
   onBookingRequest?: (ctx: string) => void;
 }) {
-  const animStyle = useCinematicText(progress, {
-    approachEnd: 0.18,
-    readingEnd: 0.82,
-  });
-  const [activeTab, setActiveTab] = useState<string>("club");
-  const activeRoom = ROOM_DATA.find((r) => r.key === activeTab) ?? ROOM_DATA[0];
+  const animStyle = useRoomsAnimation(progress);
+  const [localTime, setLocalTime] = useState(0);
+  const isActive = progress > 0.05 && progress < 0.95;
+
+  useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
+    let lastTime = Date.now();
+    let frameId: number;
+
+    const tick = () => {
+      const now = Date.now();
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+      
+      setLocalTime((prev) => (prev + dt) % 16);
+      frameId = requestAnimationFrame(tick);
+    };
+
+    frameId = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frameId);
+      setLocalTime(0);
+    };
+  }, [isActive]);
 
   return (
-    <SectionShell side="center">
-      <div style={{ ...animStyle, width: "100%", maxWidth: "680px" }}>
+    <SectionShell side="left">
+      <div style={{ ...animStyle, width: "100%", maxWidth: "520px" }} className="pointer-events-auto">
         {/* Header */}
-        <div className="text-center mb-[clamp(16px,2.5vh,28px)]">
-          <SubTag>ARRIVAL · OUR ROOMS &amp; FACILITIES</SubTag>
-          <h2 className="font-playfair text-[clamp(2rem,4.2vw,3.8rem)] font-bold text-white mb-[6px] tracking-[0.06em] leading-[1.08] [text-shadow:0_0_60px_rgba(0,0,0,0.98),0_4px_40px_rgba(0,0,0,0.9),0_0_100px_rgba(212,175,55,0.1)]">
-            Sleep Like You Were Born to This
+        <div className="text-left mb-[20px]">
+          <SubTag>Luxury Rooms &amp; Suites</SubTag>
+          <h2 className="font-playfair text-[clamp(1.8rem,3vw,2.5rem)] font-bold text-white leading-[1.1] [text-shadow:0_4px_20px_rgba(0,0,0,0.9),0_0_40px_rgba(0,0,0,0.8)]">
+            A Sanctuary Awaits
           </h2>
-          <p className="font-cormorant text-[clamp(0.85rem,1.2vw,1rem)] text-brand-gold/70 tracking-[0.18em] m-0 [text-shadow:0_2px_20px_rgba(0,0,0,0.9)]">
-            Luxury Rooms &amp; Suites
-          </p>
         </div>
 
         {/* Divider */}
-        <div className="h-[1px] bg-[linear-gradient(90deg,transparent,rgba(212,175,55,0.3),transparent)] mb-[clamp(14px,2vh,24px)]" />
+        <div className="h-[1px] bg-[linear-gradient(90deg,var(--color-brand-gold),transparent)] mb-[32px]" />
 
-        {/* Tabs */}
-        <div
-          role="tablist"
-          aria-label="Room categories"
-          className="grid grid-cols-4 gap-[2px] mb-[clamp(14px,2.5vh,28px)] pointer-events-auto"
-        >
-          {ROOM_DATA.map((room) => {
-            const isActive = activeTab === room.key;
+        {/* Animated Room Sequences */}
+        <div className="relative min-h-[220px]">
+          {ROOM_DATA.map((room, index) => {
+            const startT = index * 4;
+            const endT = startT + 4;
+            
+            let opacity = 0;
+            let blur = 10;
+            let translateY = 20;
+            let pointerEvents: "none" | "auto" = "none";
+
+            if (localTime >= startT && localTime < endT) {
+              const t = localTime - startT;
+              pointerEvents = "auto";
+              if (t < 1) {
+                // 0 to 1s: enter
+                opacity = t;
+                blur = 10 * (1 - t);
+                translateY = 20 * (1 - t);
+              } else if (t < 3) {
+                // 1s to 3s: stay
+                opacity = 1;
+                blur = 0;
+                translateY = 0;
+              } else {
+                // 3s to 4s: exit
+                const exitT = t - 3;
+                opacity = 1 - exitT;
+                blur = 10 * exitT;
+                translateY = -20 * exitT;
+                if (opacity < 0.5) pointerEvents = "none";
+              }
+            }
+
+            const style: React.CSSProperties = {
+              opacity,
+              filter: blur > 0.5 ? `blur(${blur}px)` : "none",
+              transform: `translateY(${translateY}px)`,
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              pointerEvents,
+              willChange: "opacity, filter, transform",
+            };
+
             return (
-              <button
-                key={room.key}
-                role="tab"
-                aria-selected={isActive}
-                aria-controls={`room-panel-${room.key}`}
-                id={`room-tab-${room.key}`}
-                onClick={() => setActiveTab(room.key)}
-                className={`py-[10px] px-[6px] backdrop-blur-[12px] border-b-2 border-t-0 border-x-0 font-sans text-[9px] tracking-[0.18em] uppercase cursor-pointer transition-all duration-250 ease-in-out leading-[1.4] [text-shadow:0_2px_10px_rgba(0,0,0,0.9)] ${
-                  isActive
-                    ? "bg-brand-gold/15 border-brand-gold text-brand-gold"
-                    : "bg-black/20 border-white/10 text-white/45 hover:bg-black/30 hover:text-white/70"
-                }`}
-              >
-                {room.name}
-              </button>
+              <div key={room.key} style={style}>
+                <h3 className="font-playfair text-[clamp(1.3rem,1.8vw,1.8rem)] text-brand-gold mb-[10px] [text-shadow:0_2px_10px_rgba(0,0,0,0.9)]">
+                  {room.name}
+                </h3>
+                <p className="font-cormorant text-[clamp(0.95rem,1.2vw,1.1rem)] text-white/90 leading-[1.7] mb-[24px] [text-shadow:0_2px_12px_rgba(0,0,0,0.9),0_0_24px_rgba(0,0,0,0.7)]">
+                  {room.description}
+                </p>
+                <GoldButton
+                  onClick={() => onBookingRequest?.(room.key)}
+                >
+                  BOOK {room.name.toUpperCase()}
+                </GoldButton>
+              </div>
             );
           })}
-        </div>
-
-        {/* Room info */}
-        <div
-          id={`room-panel-${activeRoom.key}`}
-          role="tabpanel"
-          aria-labelledby={`room-tab-${activeRoom.key}`}
-        >
-          <p className="font-cormorant text-[clamp(1.1rem,1.7vw,1.4rem)] text-brand-gold/90 italic mb-[14px] leading-[1.4] [text-shadow:0_2px_20px_rgba(0,0,0,0.9)]">
-            {activeRoom.tagline}
-          </p>
-          <p className="font-cormorant text-[clamp(0.95rem,1.2vw,1.1rem)] text-white/70 leading-[1.8] mb-[24px] [text-shadow:0_2px_15px_rgba(0,0,0,0.9)]">
-            {activeRoom.description}
-          </p>
-          <GoldButton
-            onClick={() => onBookingRequest?.(activeRoom.key)}
-            fullWidth
-          >
-            BOOK YOUR ROOM
-          </GoldButton>
         </div>
       </div>
     </SectionShell>
@@ -429,30 +589,7 @@ function BanquetSection({
 
 // ─── Chapter 6 → Contact ──────────────────────────────────────────────────────
 
-type ServiceOption =
-  | "Club Room Booking"
-  | "Quad Room Booking"
-  | "Suite Room Booking"
-  | "Super Deluxe Booking"
-  | "Banquet Hall Enquiry"
-  | "General Enquiry";
 
-const SERVICE_OPTIONS: ServiceOption[] = [
-  "Club Room Booking",
-  "Quad Room Booking",
-  "Suite Room Booking",
-  "Super Deluxe Booking",
-  "Banquet Hall Enquiry",
-  "General Enquiry",
-];
-
-interface ContactFormState {
-  name: string;
-  email: string;
-  phone: string;
-  service: ServiceOption | "";
-  message: string;
-}
 
 function ContactSection({ progress }: { progress: number }) {
   const animStyle = useCinematicText(progress, {
@@ -460,156 +597,124 @@ function ContactSection({ progress }: { progress: number }) {
     readingEnd: 0.9,
   });
 
-  const [form, setForm] = useState<ContactFormState>({
-    name: "",
-    email: "",
-    phone: "",
-    service: "",
-    message: "",
-  });
-
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      const { name, value } = e.target;
-      setForm((prev) => ({ ...prev, [name]: value }));
-    },
-    []
-  );
-
-  const handleSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      try {
-        if (!form.name.trim() || !form.email.trim() || !form.phone.trim() || !form.message.trim()) {
-          setStatus("error");
-          return;
-        }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(form.email.trim())) {
-          setStatus("error");
-          return;
-        }
-        setStatus("submitting");
-        setTimeout(() => {
-          setStatus("success");
-        }, 1400);
-      } catch (err) {
-        console.warn("[ContactSection] Submission error:", err);
-        setStatus("error");
-      }
-    },
-    [form]
-  );
-
-  const inputClass = "w-full py-[10px] px-[14px] bg-black/35 backdrop-blur-[8px] border border-brand-gold/20 text-white font-sans text-[12px] outline-none transition-colors duration-200 focus:border-brand-gold/50";
-  const labelClass = "block font-sans text-[9px] tracking-[0.22em] uppercase text-brand-gold/65 mb-[5px]";
+  const [menuOpen, setMenuOpen] = useState<"dining" | "banquet" | "contact" | null>(null);
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center pt-[72px] px-[clamp(20px,5vw,60px)] pb-[clamp(60px,8vh,80px)] pointer-events-none">
-      <div
-        style={animStyle}
-        className="w-full max-w-[860px] grid grid-cols-1 md:grid-cols-[1fr_1.15fr] border-t border-brand-gold/20 border-b border-brand-gold/5"
-      >
-        {/* Left info */}
-        <div className="p-[clamp(24px,3.5vw,44px)] border-r border-brand-gold/10 bg-black/20 backdrop-blur-[16px]">
-          <SubTag>Contact Information</SubTag>
-          <GoldRule width={40} />
-          <h2 className="font-playfair text-[clamp(1.5rem,2.5vw,2.2rem)] font-bold text-white mb-[14px] leading-[1.2] [text-shadow:0_2px_30px_rgba(0,0,0,0.9)]">
+    <>
+      <div className="absolute inset-0 flex items-end justify-center pb-[clamp(60px,10vh,100px)] pointer-events-none z-10">
+        <div
+          style={animStyle}
+          className="flex flex-wrap justify-center gap-[16px] pointer-events-auto"
+        >
+          <GoldButton onClick={() => setMenuOpen("contact")}>
             Contact Us
-          </h2>
-          <p className="font-cormorant text-[clamp(0.88rem,1.1vw,1rem)] text-white/65 leading-[1.72] mb-[24px] [text-shadow:0_2px_15px_rgba(0,0,0,0.9)]">
-            Have questions or need help with your booking? Our team is always
-            ready to assist — feel free to contact us anytime.
-          </p>
-
-          {[
-            { icon: "📞", label: "Phone", value: "+91 82382 82341 / +91 82382 82361" },
-            { icon: "✉️", label: "Email", value: "Hoteltheblackstone@gmail.com" },
-            { icon: "🕐", label: "Hours", value: "24/7 Front Desk / Guest Relations" },
-            { icon: "📍", label: "Address", value: "150 Ft. Ring Road, Nr. Sokhda Chowkdi, Rajkot - 360006, Gujarat" },
-          ].map((item) => (
-            <div key={item.label} className="flex gap-[12px] mb-[14px]">
-              <span className="text-[12px] opacity-60 mt-[2px] shrink-0">
-                {item.icon}
-              </span>
-              <div>
-                <p className="font-sans text-[8px] tracking-[0.22em] uppercase text-brand-gold/50 mb-[2px]">
-                  {item.label}
-                </p>
-                <p className="font-cormorant text-[clamp(0.82rem,0.95vw,0.92rem)] text-white/80 m-0 leading-[1.5] [text-shadow:0_2px_10px_rgba(0,0,0,0.9)]">
-                  {item.value}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Right form */}
-        <div className="p-[clamp(24px,3.5vw,44px)] pointer-events-auto bg-black/25 backdrop-blur-[20px]">
-          <SubTag>* Get In Touch</SubTag>
-          <GoldRule width={40} />
-          <h3 className="font-playfair text-[clamp(1.2rem,2vw,1.55rem)] font-bold text-white mb-[6px] [text-shadow:0_2px_20px_rgba(0,0,0,0.9)]">
-            Get In Touch
-          </h3>
-          <p className="font-cormorant text-[clamp(0.82rem,1vw,0.92rem)] text-white/50 mb-[20px] leading-[1.6]">
-            We&apos;d love to hear about your travel plans.
-          </p>
-
-          {status === "success" ? (
-            <div className="p-[28px] text-center border border-brand-gold/25 bg-brand-gold/5">
-              <p className="font-playfair text-[1.25rem] text-brand-gold mb-[6px]">
-                Message Sent
-              </p>
-              <p className="font-cormorant text-white/60 text-[0.95rem] m-0">
-                Our team will get back to you shortly.
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-[12px]">
-              <div>
-                <label htmlFor="cs-name" className={labelClass}>Name *</label>
-                <input id="cs-name" name="name" type="text" required autoComplete="name" value={form.name} onChange={handleChange} className={inputClass} placeholder="Your full name" />
-              </div>
-              <div className="grid grid-cols-2 gap-[10px]">
-                <div>
-                  <label htmlFor="cs-email" className={labelClass}>Email *</label>
-                  <input id="cs-email" name="email" type="email" required autoComplete="email" value={form.email} onChange={handleChange} className={inputClass} placeholder="you@example.com" />
-                </div>
-                <div>
-                  <label htmlFor="cs-phone" className={labelClass}>Phone *</label>
-                  <input id="cs-phone" name="phone" type="tel" required autoComplete="tel" value={form.phone} onChange={handleChange} className={inputClass} placeholder="+91 00000 00000" />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="cs-service" className={labelClass}>Service Interested In</label>
-                <select id="cs-service" name="service" value={form.service} onChange={handleChange} className={`${inputClass} cursor-pointer`}>
-                  <option value="" className="bg-[#111]">Select a service…</option>
-                  {SERVICE_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt} className="bg-[#111]">{opt}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="cs-message" className={labelClass}>Message *</label>
-                <textarea id="cs-message" name="message" required rows={3} value={form.message} onChange={handleChange} className={`${inputClass} resize-y leading-[1.6]`} placeholder="Tell us about your plans…" />
-              </div>
-              {status === "error" && (
-                <p className="font-sans text-[10px] text-[#ff6464] m-0">
-                  Please fill in all required fields with valid information.
-                </p>
-              )}
-              <div className="mt-[4px]">
-                <GoldButton fullWidth type="submit">
-                  {status === "submitting" ? "Sending…" : "Send Message"}
-                </GoldButton>
-              </div>
-            </form>
-          )}
+          </GoldButton>
+          <GoldButton onClick={() => setMenuOpen("dining")}>
+            Dining Menu
+          </GoldButton>
+          <GoldButton onClick={() => setMenuOpen("banquet")}>
+            Banquet Menu
+          </GoldButton>
         </div>
       </div>
-    </div>
+
+      {/* Contact Info Modal */}
+      {menuOpen === "contact" && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-[20px] bg-black/80 backdrop-blur-md pointer-events-auto transition-opacity duration-300">
+          <div className="bg-[#0a0a0a] border border-brand-gold/30 p-[clamp(30px,4vw,50px)] max-w-[600px] w-full relative shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+            <button 
+              onClick={() => setMenuOpen(null)}
+              className="absolute top-[20px] right-[20px] text-brand-gold/60 hover:text-brand-gold text-[20px] transition-colors cursor-pointer"
+              aria-label="Close"
+            >
+              ✕
+            </button>
+            <div className="text-center mb-[30px]">
+              <SubTag>Get In Touch</SubTag>
+              <div className="flex justify-center mt-[10px] mb-[15px]">
+                <GoldRule width={60} />
+              </div>
+              <h3 className="font-playfair text-[clamp(1.8rem,3vw,2.5rem)] text-brand-gold">
+                Contact Information
+              </h3>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-[16px]">
+              {[
+                { icon: "📞", label: "Phone", value: "+91 82382 82341 / +91 82382 82361" },
+                { icon: "✉️", label: "Email", value: "Hoteltheblackstone@gmail.com" },
+                { icon: "🕐", label: "Hours", value: "24/7 Front Desk / Guest Relations" },
+                { icon: "📍", label: "Address", value: "150 Ft. Ring Road, Nr. Sokhda Chowkdi, Rajkot - 360006, Gujarat" },
+              ].map((item) => (
+                <div key={item.label} className="flex gap-[16px] bg-white/5 p-[16px] border border-white/10">
+                  <span className="text-[18px] opacity-80 shrink-0 mt-[2px]">
+                    {item.icon}
+                  </span>
+                  <div>
+                    <p className="font-sans text-[10px] tracking-[0.22em] uppercase text-brand-gold/70 mb-[4px]">
+                      {item.label}
+                    </p>
+                    <p className="font-cormorant text-[1.1rem] text-white/90 m-0 leading-[1.5]">
+                      {item.value}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-[40px] flex justify-center">
+              <GoldButton onClick={() => setMenuOpen(null)}>
+                Close
+              </GoldButton>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Menu Card Modal */}
+      {(menuOpen === "dining" || menuOpen === "banquet") && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-[20px] bg-black/80 backdrop-blur-md pointer-events-auto transition-opacity duration-300">
+          <div className="bg-[#0a0a0a] border border-brand-gold/30 p-[clamp(30px,4vw,50px)] max-w-[700px] w-full text-center relative shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+            <button 
+              onClick={() => setMenuOpen(null)}
+              className="absolute top-[20px] right-[20px] text-brand-gold/60 hover:text-brand-gold text-[20px] transition-colors cursor-pointer"
+              aria-label="Close menu"
+            >
+              ✕
+            </button>
+            <SubTag>
+              {menuOpen === "dining" ? "The Blackstone Restaurant" : "The Blackstone Events"}
+            </SubTag>
+            <div className="flex justify-center mt-[10px] mb-[15px]">
+              <GoldRule width={60} />
+            </div>
+            <h3 className="font-playfair text-[clamp(1.8rem,3vw,2.5rem)] text-brand-gold mb-[15px]">
+              {menuOpen === "dining" ? "Dining Menu" : "Banquet Menu"}
+            </h3>
+            <p className="font-cormorant text-[clamp(1rem,1.2vw,1.1rem)] text-white/70 mb-[40px] max-w-[400px] mx-auto">
+              {menuOpen === "dining" 
+                ? "An exquisite selection of regional specialties and global cuisine, crafted to perfection." 
+                : "Bespoke catering packages and curated multi-course experiences for your grandest celebrations."}
+            </p>
+            
+            {/* Menu Placeholder */}
+            <div className="aspect-[1/1.4] sm:aspect-[16/9] w-full border border-white/10 bg-[linear-gradient(135deg,#111,#000)] flex flex-col items-center justify-center p-[20px] relative overflow-hidden">
+              <div className="absolute inset-[10px] border border-brand-gold/10 pointer-events-none" />
+              <span className="font-playfair text-[3rem] text-brand-gold/20 mb-[10px]">B</span>
+              <span className="text-white/40 font-sans text-[10px] sm:text-[12px] tracking-[0.3em] uppercase max-w-[300px] leading-[1.8]">
+                {menuOpen === "dining" ? "Menu Content Currently Under Review by Executive Chef" : "Banquet Packages and Pricing Available Upon Request"}
+              </span>
+            </div>
+            
+            <div className="mt-[40px] flex justify-center">
+              <GoldButton onClick={() => setMenuOpen(null)}>
+                Close Menu
+              </GoldButton>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

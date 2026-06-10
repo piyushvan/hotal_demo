@@ -88,12 +88,17 @@ export function ContactModal({ isOpen, context = "", onClose }: ContactModalProp
 
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
-  useEffect(() => {
-    if (isOpen) {
-      setForm((prev) => ({ ...prev, roomType: contextToRoomType[context] ?? prev.roomType }));
-      setStatus("idle");
-    }
-  }, [isOpen, context]);
+  const [lastOpen, setLastOpen] = useState(false);
+  const [lastContext, setLastContext] = useState("");
+
+  if (isOpen && (!lastOpen || context !== lastContext)) {
+    setLastOpen(isOpen);
+    setLastContext(context);
+    setForm((prev) => ({ ...prev, roomType: contextToRoomType[context] ?? prev.roomType }));
+    setStatus("idle");
+  } else if (!isOpen && lastOpen) {
+    setLastOpen(false);
+  }
 
   useEffect(() => {
     if (!isOpen) return;
