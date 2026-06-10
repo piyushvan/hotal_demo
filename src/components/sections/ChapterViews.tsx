@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { GoldRule, SubTag, GoldButton } from "@/components/ui/DesignSystem";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -355,26 +355,42 @@ function RoomsSection({
   const animStyle = useRoomsAnimation(progress);
   const isActive = progress > 0.05 && progress < 0.95;
 
-  const [activeRoomIndex, setActiveRoomIndex] = useState(0);
-
-  useEffect(() => {
-    if (!isActive) {
-      // Reset active index asynchronously to avoid synchronous setState inside useEffect warning
-      const handle = requestAnimationFrame(() => {
-        setActiveRoomIndex(0);
-      });
-      return () => cancelAnimationFrame(handle);
-    }
-
-    const interval = setInterval(() => {
-      setActiveRoomIndex((prev) => (prev + 1) % ROOM_DATA.length);
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [isActive]);
-
   return (
     <SectionShell side="left">
+      <style>{`
+        @keyframes cycleRooms {
+          0% {
+            opacity: 0;
+            filter: blur(10px);
+            transform: translateY(20px);
+            pointer-events: none;
+          }
+          6.25% { /* 1s fade-in */
+            opacity: 1;
+            filter: blur(0px);
+            transform: translateY(0px);
+            pointer-events: auto;
+          }
+          18.75% { /* stay visible until 3s */
+            opacity: 1;
+            filter: blur(0px);
+            transform: translateY(0px);
+            pointer-events: auto;
+          }
+          25% { /* 4s fade-out */
+            opacity: 0;
+            filter: blur(10px);
+            transform: translateY(-20px);
+            pointer-events: none;
+          }
+          100% {
+            opacity: 0;
+            filter: blur(10px);
+            transform: translateY(-20px);
+            pointer-events: none;
+          }
+        }
+      `}</style>
       <div style={{ ...animStyle, width: "100%", maxWidth: "520px" }} className="pointer-events-auto">
         {/* Header */}
         <div className="text-left mb-[20px]">
@@ -387,23 +403,23 @@ function RoomsSection({
         {/* Divider */}
         <div className="h-[1px] bg-[linear-gradient(90deg,var(--color-brand-gold),transparent)] mb-[32px]" />
 
-        {/* Animated Room Sequences — only re-renders when slot changes (every 4s) */}
+        {/* Animated Room Sequences — 100% GPU-composited CSS animation */}
         <div className="relative min-h-[220px]">
           {ROOM_DATA.map((room, index) => {
-            const active = index === activeRoomIndex;
-            const isPrev = index === (activeRoomIndex - 1 + ROOM_DATA.length) % ROOM_DATA.length;
+            const cardStyle: React.CSSProperties = {
+              animationName: "cycleRooms",
+              animationDuration: "16s",
+              animationIterationCount: "infinite",
+              animationDelay: `${index * -4}s`,
+              animationPlayState: isActive ? "running" : "paused",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+            };
 
             return (
-              <div
-                key={room.key}
-                className={`absolute inset-x-0 top-0 transition-all duration-1000 ease-in-out ${
-                  active
-                    ? "opacity-100 translate-y-0 blur-none pointer-events-auto z-10"
-                    : isPrev
-                    ? "opacity-0 -translate-y-5 blur-md pointer-events-none z-0"
-                    : "opacity-0 translate-y-5 blur-md pointer-events-none z-0"
-                }`}
-              >
+              <div key={room.key} style={cardStyle}>
                 <h3 className="font-playfair text-[clamp(1.3rem,1.8vw,1.8rem)] text-brand-gold mb-[10px] [text-shadow:0_2px_10px_rgba(0,0,0,0.9)]">
                   {room.name}
                 </h3>
