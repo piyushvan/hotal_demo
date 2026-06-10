@@ -5,9 +5,9 @@ import React, { useState, useCallback } from "react";
 const QUICK_LINKS = [
   { label: "Home",           href: "#hero"    },
   { label: "About Us",       href: "#about"   },
-  { label: "Rooms & Suites", href: "#gallery" },
-  { label: "Restaurant",     href: "#gallery" },
-  { label: "Banquet Hall",   href: "#gallery" },
+  { label: "Rooms & Suites", href: "#rooms"   },
+  { label: "Restaurant",     href: "#dining"  },
+  { label: "Banquet Hall",   href: "#dining"  },
   { label: "Gallery",        href: "#gallery" },
   { label: "FAQ",            href: "#faq"     },
 ] as const;
@@ -326,15 +326,21 @@ export function ContactAndFooter() {
                 definitive statement in business and luxury hospitality.
               </p>
               <div className="flex gap-[8px]">
-                {["Facebook", "Instagram", "Twitter"].map((social) => (
-                  <button
-                    key={social}
-                    type="button"
-                    aria-label={social}
-                    className="w-[32px] h-[32px] border border-brand-gold/20 bg-transparent text-white/40 text-[11px] cursor-pointer flex items-center justify-center transition-all duration-200 font-sans hover:border-brand-gold/60 hover:text-brand-gold"
+                {[
+                  { label: "Facebook", href: "https://facebook.com", icon: "f" },
+                  { label: "Instagram", href: "https://instagram.com", icon: "ig" },
+                  { label: "Twitter", href: "https://twitter.com", icon: "tw" },
+                ].map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    className="w-[32px] h-[32px] border border-brand-gold/20 bg-transparent text-white/40 text-[11px] flex items-center justify-center transition-all duration-200 font-sans hover:border-brand-gold/60 hover:text-brand-gold no-underline"
                   >
-                    {social === "Facebook" ? "f" : social === "Instagram" ? "ig" : "tw"}
-                  </button>
+                    {social.icon}
+                  </a>
                 ))}
               </div>
             </div>

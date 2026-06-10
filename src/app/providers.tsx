@@ -28,10 +28,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       gsap.ticker.add(updateLenis);
       gsap.ticker.lagSmoothing(0);
 
-      // Set state in the SAME effect, after full setup — avoids Strict Mode stale ref
-      setLenis(lenisInstance);
+      // Set state asynchronously to avoid synchronous setState inside useEffect warning
+      const rafHandle = requestAnimationFrame(() => {
+        setLenis(lenisInstance);
+      });
 
       return () => {
+        cancelAnimationFrame(rafHandle);
         lenisInstance.destroy();
         gsap.ticker.remove(updateLenis);
         lenisRef.current = null;

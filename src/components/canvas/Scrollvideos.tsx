@@ -29,6 +29,7 @@ export default function ScrollVideo({
   enterStyle = 'warp',
   exitStyle = 'warp',
   overlayType,
+  id,
 }: {
   src: string;
   zIndex?: number;
@@ -37,6 +38,7 @@ export default function ScrollVideo({
   enterStyle?: TransitionStyle;
   exitStyle?: TransitionStyle;
   overlayType?: OverlayType;
+  id?: string;
 }) {
   // React state is only used for driving overlay components.
   // Video opacity/scale/blur are written directly to DOM for zero-GC perf.
@@ -197,6 +199,7 @@ export default function ScrollVideo({
   return (
     <div
       ref={containerRef}
+      id={id}
       className={`absolute w-full h-[800vh] ${className}`}
       style={{ zIndex, ...style }}
     >

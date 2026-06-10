@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
+import Image from "next/image";
 
 // ─── Gallery data — real hotel images from public/gallary ─────────────────────
 const GALLERY_IMAGES = [
@@ -117,11 +118,13 @@ function Lightbox({ image, images, onClose, onNavigate }: LightboxProps) {
         onClick={(e) => e.stopPropagation()}
         className="max-w-[90vw] max-h-[85vh] relative"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={image.src}
           alt={image.alt}
-          className="max-w-[90vw] max-h-[80vh] object-contain block border border-brand-gold/15 drop-shadow-[0_0_80px_rgba(0,0,0,0.9)]"
+          width={1200}
+          height={800}
+          priority
+          className="max-w-[90vw] max-h-[80vh] object-contain block border border-brand-gold/15 drop-shadow-[0_0_80px_rgba(0,0,0,0.9)] w-auto h-auto"
         />
         {/* Caption */}
         <div className="mt-[14px] text-center">
@@ -162,10 +165,11 @@ function GalleryThumbnail({ image, onClick }: ThumbnailProps) {
       onClick={() => onClick(image.id)}
       className="group bg-transparent border-none p-0 cursor-pointer relative overflow-hidden aspect-[4/3] block w-full outline outline-1 outline-transparent outline-offset-0 transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.02] hover:outline-brand-gold/60"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={image.src}
         alt={image.alt}
+        fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         className="w-full h-full object-cover block filter brightness-80 transition-all duration-400 ease-in-out group-hover:brightness-[1.08] group-hover:scale-[1.05]"
       />
 

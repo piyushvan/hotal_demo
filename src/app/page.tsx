@@ -42,6 +42,7 @@ export default function Home() {
           <ScrollVideo
             key={s.src}
             src={s.src}
+            id={s.overlay === "contact" ? "contact-scrolling" : s.overlay}
             className={`top-0 left-0`}
             style={{ top: `${i * SECTION_STEP}vh` }}
             zIndex={i + 1}

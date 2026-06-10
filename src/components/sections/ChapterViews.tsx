@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { GoldRule, SubTag, GoldButton } from "@/components/ui/DesignSystem";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -343,9 +343,7 @@ function useRoomsAnimation(progress: number): React.CSSProperties {
   }, [progress]);
 }
 
-// Each room slot is 4s: 1s enter + 2s stay + 1s exit. Total cycle = 4 × 4 = 16s.
-const ROOM_SLOT = 4;
-const ROOM_CYCLE = ROOM_DATA.length * ROOM_SLOT; // 16s
+// Rooms cycling sequence configuration
 
 function RoomsSection({
   progress,
@@ -357,42 +355,22 @@ function RoomsSection({
   const animStyle = useRoomsAnimation(progress);
   const isActive = progress > 0.05 && progress < 0.95;
 
-  // ── Fix #10: use a ref for elapsed time instead of setState ─────────────────
-  // This avoids a 60fps React re-render loop. Instead we store elapsed in a ref
-  // and use a separate state that only updates once per room slot change (4s).
-  const elapsedRef = useRef(0);
-  const lastTimestampRef = useRef<number | null>(null);
-  const frameRef = useRef<number | null>(null);
   const [activeRoomIndex, setActiveRoomIndex] = useState(0);
 
   useEffect(() => {
     if (!isActive) {
-      // Reset on deactivation
-      elapsedRef.current = 0;
-      lastTimestampRef.current = null;
-      setActiveRoomIndex(0);
-      return;
+      // Reset active index asynchronously to avoid synchronous setState inside useEffect warning
+      const handle = requestAnimationFrame(() => {
+        setActiveRoomIndex(0);
+      });
+      return () => cancelAnimationFrame(handle);
     }
 
-    const tick = (timestamp: number) => {
-      if (lastTimestampRef.current !== null) {
-        elapsedRef.current += (timestamp - lastTimestampRef.current) / 1000;
-        elapsedRef.current = elapsedRef.current % ROOM_CYCLE;
-      }
-      lastTimestampRef.current = timestamp;
+    const interval = setInterval(() => {
+      setActiveRoomIndex((prev) => (prev + 1) % ROOM_DATA.length);
+    }, 4000);
 
-      // Only trigger a React re-render when the active slot changes (every 4s)
-      const newIndex = Math.floor(elapsedRef.current / ROOM_SLOT) % ROOM_DATA.length;
-      setActiveRoomIndex((prev) => (prev !== newIndex ? newIndex : prev));
-
-      frameRef.current = requestAnimationFrame(tick);
-    };
-
-    frameRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
-      lastTimestampRef.current = null;
-    };
+    return () => clearInterval(interval);
   }, [isActive]);
 
   return (
@@ -412,57 +390,20 @@ function RoomsSection({
         {/* Animated Room Sequences — only re-renders when slot changes (every 4s) */}
         <div className="relative min-h-[220px]">
           {ROOM_DATA.map((room, index) => {
-            // Compute animation sub-progress within this room's slot
-            const slotStart = index * ROOM_SLOT;
-            const t = elapsedRef.current - slotStart;
-            const isThisSlot = t >= 0 && t < ROOM_SLOT;
-
-            let opacity = 0;
-            let blur = 10;
-            let translateY = 20;
-            let pointerEvents: "none" | "auto" = "none";
-
-            // Only run animation math for the active and adjacent slots
-            if (isThisSlot) {
-              pointerEvents = "auto";
-              if (t < 1) {
-                // 0 to 1s: enter
-                opacity = t;
-                blur = 10 * (1 - t);
-                translateY = 20 * (1 - t);
-              } else if (t < 3) {
-                // 1s to 3s: stay
-                opacity = 1;
-                blur = 0;
-                translateY = 0;
-              } else {
-                // 3s to 4s: exit
-                const exitT = t - 3;
-                opacity = 1 - exitT;
-                blur = 10 * exitT;
-                translateY = -20 * exitT;
-                if (opacity < 0.5) pointerEvents = "none";
-              }
-            }
-
-            const style: React.CSSProperties = {
-              opacity,
-              filter: blur > 0.5 ? `blur(${blur}px)` : "none",
-              transform: `translateY(${translateY}px)`,
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              pointerEvents,
-            };
-
-            // Render all 4 but only the visible ones have opacity > 0
-            // Use activeRoomIndex as part of the key to ensure React sees this as
-            // needing a re-render when the slot changes
-            const _ = activeRoomIndex; // consumed to satisfy React's render trigger
+            const active = index === activeRoomIndex;
+            const isPrev = index === (activeRoomIndex - 1 + ROOM_DATA.length) % ROOM_DATA.length;
 
             return (
-              <div key={`${room.key}-${_}`} style={style}>
+              <div
+                key={room.key}
+                className={`absolute inset-x-0 top-0 transition-all duration-1000 ease-in-out ${
+                  active
+                    ? "opacity-100 translate-y-0 blur-none pointer-events-auto z-10"
+                    : isPrev
+                    ? "opacity-0 -translate-y-5 blur-md pointer-events-none z-0"
+                    : "opacity-0 translate-y-5 blur-md pointer-events-none z-0"
+                }`}
+              >
                 <h3 className="font-playfair text-[clamp(1.3rem,1.8vw,1.8rem)] text-brand-gold mb-[10px] [text-shadow:0_2px_10px_rgba(0,0,0,0.9)]">
                   {room.name}
                 </h3>
