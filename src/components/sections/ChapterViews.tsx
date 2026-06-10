@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
+import { GoldRule, SubTag, GoldButton } from "@/components/ui/DesignSystem";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -73,66 +74,6 @@ function useCinematicText(
   }, [progress, approachEnd, readingEnd, exitStagger]);
 }
 
-// ─── Reusable Transparent Components ─────────────────────────────────────────
-
-function GoldRule({ width = 52 }: { width?: number }) {
-  return (
-    <div
-      className="h-[1px] bg-[linear-gradient(90deg,var(--color-brand-gold),rgba(212,175,55,0.2))] mb-[20px]"
-      style={{ width: `${width}px` }}
-    />
-  );
-}
-
-function SubTag({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="font-sans text-[10px] tracking-[0.28em] uppercase text-brand-gold/75 mb-[10px] font-normal">
-      {children}
-    </p>
-  );
-}
-
-function SectionHeadline({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="font-playfair text-[clamp(2rem,4.5vw,4.2rem)] font-bold text-white mb-[20px] leading-[1.1] max-w-[620px] [text-shadow:0_0_60px_rgba(0,0,0,0.95),0_4px_40px_rgba(0,0,0,0.9),0_0_100px_rgba(212,175,55,0.1)]">
-      {children}
-    </h2>
-  );
-}
-
-function SectionBody({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="font-cormorant text-[clamp(1rem,1.4vw,1.25rem)] leading-[1.85] text-white/80 mb-[28px] max-w-[480px] font-normal [text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_0_40px_rgba(0,0,0,0.8)]">
-      {children}
-    </p>
-  );
-}
-
-function GoldButton({
-  children,
-  onClick,
-  fullWidth = false,
-  type = "button"
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  fullWidth?: boolean;
-  type?: "button" | "submit";
-}) {
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      className={`pointer-events-auto inline-flex items-center gap-[10px] py-[13px] px-[32px] bg-black/30 border border-brand-gold/55 text-brand-gold font-sans text-[10px] font-semibold tracking-[0.24em] uppercase cursor-pointer transition-all duration-200 ease-in-out backdrop-blur-[8px] shadow-[0_4px_24px_rgba(0,0,0,0.5)] hover:bg-brand-gold hover:text-black hover:border-brand-gold hover:shadow-[0_4px_20px_rgba(212,175,55,0.3)] ${
-        fullWidth ? "w-full justify-center" : ""
-      } group`}
-    >
-      {children}
-      <span className="opacity-70 text-[10px] group-hover:text-black">→</span>
-    </button>
-  );
-}
-
 // ─── Transparent Section Shell ────────────────────────────────────────────────
 
 interface SectionShellProps {
@@ -146,12 +87,12 @@ function SectionShell({
   side = "right",
   verticalAlign = "center",
 }: SectionShellProps) {
-  const justifyClass = 
-    side === "left" ? "justify-start" : 
+  const justifyClass =
+    side === "left" ? "justify-start" :
     side === "right" ? "justify-end" : "justify-center";
-    
-  const alignClass = 
-    verticalAlign === "top" ? "items-start" : 
+
+  const alignClass =
+    verticalAlign === "top" ? "items-start" :
     verticalAlign === "bottom" ? "items-end pb-[clamp(60px,8vh,100px)]" : "items-center pb-[clamp(60px,8vh,80px)]";
 
   return (
@@ -177,41 +118,51 @@ function ContentBlock({ children, animStyle, maxWidth = "540px" }: ContentBlockP
   );
 }
 
+function SectionHeadline({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="font-playfair text-[clamp(2rem,4.5vw,4.2rem)] font-bold text-white mb-[20px] leading-[1.1] max-w-[620px] [text-shadow:0_0_60px_rgba(0,0,0,0.95),0_4px_40px_rgba(0,0,0,0.9),0_0_100px_rgba(212,175,55,0.1)]">
+      {children}
+    </h2>
+  );
+}
+
+function SectionBody({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="font-cormorant text-[clamp(1rem,1.4vw,1.25rem)] leading-[1.85] text-white/80 mb-[28px] max-w-[480px] font-normal [text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_0_40px_rgba(0,0,0,0.8)]">
+      {children}
+    </p>
+  );
+}
+
 // ─── Custom Animation for Reception (Video 2) ───────────────────────────────
 function useReceptionAnimation(progress: number): React.CSSProperties {
   return useMemo(() => {
     let opacity = 0;
     let translateX = 0;
     let translateY = 0;
-    let scale = 0.85; // Text slightly smaller overall as requested
+    const scale = 0.85;
     let blur = 0;
 
     if (progress < 0.1) {
-      // 0 to 1s (0.0 to 0.1): Invisible
       opacity = 0;
       blur = 10;
       translateY = 20;
     } else if (progress < 0.2) {
-      // 1s to 2s (0.1 to 0.2): Fade in and clear
       const t = (progress - 0.1) / 0.1;
       opacity = t;
       blur = 10 * (1 - t);
       translateY = 20 * (1 - t);
     } else if (progress < 0.5) {
-      // 2s to 5s (0.2 to 0.5): Move right relative to starting position
       const t = (progress - 0.2) / 0.3;
       opacity = 1;
-      translateX = t * 80; // Drift smoothly right by 80px
+      translateX = t * 80;
       blur = 0;
     } else if (progress < 0.6) {
-      // 5s to 6s (0.5 to 0.6): Fade out with animation
       const t = (progress - 0.5) / 0.1;
       opacity = 1 - t;
       blur = t * 15;
-      scale = 0.85 + t * 0.08; // slightly scale up while fading
-      translateX = 80 + t * 30; // continue drifting
+      translateX = 80 + t * 30;
     } else {
-      // After 6s: completely gone (before the camera starts walking around the corner)
       opacity = 0;
       blur = 10;
     }
@@ -219,7 +170,7 @@ function useReceptionAnimation(progress: number): React.CSSProperties {
     return {
       opacity,
       transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
-      transformOrigin: "right center", // Keep scaling anchored to the right since it's on the right side
+      transformOrigin: "right center",
       filter: blur > 0.5 ? `blur(${blur}px)` : "none",
       willChange: "opacity, transform, filter",
     };
@@ -264,30 +215,25 @@ function useDiningAnimation(progress: number): React.CSSProperties {
     let opacity = 0;
     let translateX = 0;
     let translateY = 0;
-    let scale = 0.85; // Keeping text smaller for consistency
+    const scale = 0.85;
     let blur = 0;
 
     if (progress < 0.1) {
-      // 0 to 1s (0.0 to 0.1): Fade in
       const t = progress / 0.1;
       opacity = t;
       blur = 10 * (1 - t);
       translateY = 20 * (1 - t);
     } else if (progress < 0.5) {
-      // 1s to 5s (0.1 to 0.5): Stay visible, very subtle drift left
       const t = (progress - 0.1) / 0.4;
       opacity = 1;
-      translateX = -(t * 20); // drift left slightly
+      translateX = -(t * 20);
       blur = 0;
     } else if (progress < 0.7) {
-      // 5s to 7s (0.5 to 0.7): Fade out towards the left side
       const t = (progress - 0.5) / 0.2;
       opacity = 1 - t;
       blur = t * 15;
-      scale = 0.85 + t * 0.05; // slightly scale up while fading
-      translateX = -20 - (t * 80); // move strongly left while fading
+      translateX = -20 - (t * 80);
     } else {
-      // After 7s: completely gone
       opacity = 0;
       blur = 10;
     }
@@ -295,7 +241,7 @@ function useDiningAnimation(progress: number): React.CSSProperties {
     return {
       opacity,
       transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
-      transformOrigin: "left center", // Anchored to the left
+      transformOrigin: "left center",
       filter: blur > 0.5 ? `blur(${blur}px)` : "none",
       willChange: "opacity, transform, filter",
     };
@@ -335,66 +281,30 @@ function DiningSection({
   );
 }
 
-// ─── Chapter 3 → Elevator Lobby ───────────────────────────────────────────────
-
-function ElevatorSection({
-  progress,
-  onBookingRequest,
-}: {
-  progress: number;
-  onBookingRequest?: (ctx: string) => void;
-}) {
-  const animStyle = useCinematicText(progress, { approachEnd: 0.2, readingEnd: 0.72 });
-
-  return (
-    <SectionShell side="right">
-      <ContentBlock animStyle={animStyle}>
-        <SubTag>The in-between is where the magic lives.</SubTag>
-        <GoldRule />
-        <SectionHeadline>Every Floor, A New World</SectionHeadline>
-        <SectionBody>
-          At The Blackstone, the journey to your room is part of the
-          experience. Our living green walls — bursting with ferns, moss,
-          succulents, and seasonal blooms — transform a functional corridor
-          into a sensory pause. The scent of living plants, the stillness of
-          marble, the gleam of steel: this is the hotel&apos;s breathing space.
-        </SectionBody>
-        <GoldButton onClick={() => onBookingRequest?.("elevator")}>
-          Discover Your Floor
-        </GoldButton>
-      </ContentBlock>
-    </SectionShell>
-  );
-}
-
 // ─── Chapter 4 → Rooms & Suites ───────────────────────────────────────────────
 
 const ROOM_DATA = [
   {
     key: "club",
     name: "Club Room",
-    tagline: "Precision Designed for the Purposeful Traveller",
     description:
       "Flagship standard — ergonomic workspace, high-speed fibre Wi-Fi, 43-inch Smart 4K TV, and a bed engineered for deep, restorative sleep.",
   },
   {
     key: "quad",
     name: "Quad Room",
-    tagline: "Two Beds. One Standard. Boundless Together.",
     description:
       "Built for the group that travels as one — family reunions, colleague trips, friend getaways — the Quad Room provides two double beds within a generously proportioned space.",
   },
   {
     key: "suite",
     name: "Suite Room",
-    tagline: "The Suite Life Is Not a Cliché. It Is a Coordinate.",
     description:
       "Enter a room that unfolds. The Suite at The Blackstone offers a separate living zone, expanded wardrobe space, premium bathroom with freestanding bath, and views that remind you exactly where you are.",
   },
   {
     key: "superdeluxe",
     name: "Super Deluxe",
-    tagline: "When You Have Earned the Extraordinary",
     description:
       "The Super Deluxe Room occupies the top tier of our standard accommodation — a space where every detail has been magnified. Larger footprint, premium furniture, enhanced minibar.",
   },
@@ -405,7 +315,7 @@ function useRoomsAnimation(progress: number): React.CSSProperties {
   return useMemo(() => {
     let opacity = 0;
     let translateY = 0;
-    const scale = 0.85; // Significantly smaller
+    const scale = 0.85;
     let blur = 0;
 
     if (progress < 0.15) {
@@ -433,6 +343,10 @@ function useRoomsAnimation(progress: number): React.CSSProperties {
   }, [progress]);
 }
 
+// Each room slot is 4s: 1s enter + 2s stay + 1s exit. Total cycle = 4 × 4 = 16s.
+const ROOM_SLOT = 4;
+const ROOM_CYCLE = ROOM_DATA.length * ROOM_SLOT; // 16s
+
 function RoomsSection({
   progress,
   onBookingRequest,
@@ -441,30 +355,43 @@ function RoomsSection({
   onBookingRequest?: (ctx: string) => void;
 }) {
   const animStyle = useRoomsAnimation(progress);
-  const [localTime, setLocalTime] = useState(0);
   const isActive = progress > 0.05 && progress < 0.95;
+
+  // ── Fix #10: use a ref for elapsed time instead of setState ─────────────────
+  // This avoids a 60fps React re-render loop. Instead we store elapsed in a ref
+  // and use a separate state that only updates once per room slot change (4s).
+  const elapsedRef = useRef(0);
+  const lastTimestampRef = useRef<number | null>(null);
+  const frameRef = useRef<number | null>(null);
+  const [activeRoomIndex, setActiveRoomIndex] = useState(0);
 
   useEffect(() => {
     if (!isActive) {
+      // Reset on deactivation
+      elapsedRef.current = 0;
+      lastTimestampRef.current = null;
+      setActiveRoomIndex(0);
       return;
     }
 
-    let lastTime = Date.now();
-    let frameId: number;
+    const tick = (timestamp: number) => {
+      if (lastTimestampRef.current !== null) {
+        elapsedRef.current += (timestamp - lastTimestampRef.current) / 1000;
+        elapsedRef.current = elapsedRef.current % ROOM_CYCLE;
+      }
+      lastTimestampRef.current = timestamp;
 
-    const tick = () => {
-      const now = Date.now();
-      const dt = (now - lastTime) / 1000;
-      lastTime = now;
-      
-      setLocalTime((prev) => (prev + dt) % 16);
-      frameId = requestAnimationFrame(tick);
+      // Only trigger a React re-render when the active slot changes (every 4s)
+      const newIndex = Math.floor(elapsedRef.current / ROOM_SLOT) % ROOM_DATA.length;
+      setActiveRoomIndex((prev) => (prev !== newIndex ? newIndex : prev));
+
+      frameRef.current = requestAnimationFrame(tick);
     };
 
-    frameId = requestAnimationFrame(tick);
+    frameRef.current = requestAnimationFrame(tick);
     return () => {
-      cancelAnimationFrame(frameId);
-      setLocalTime(0);
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+      lastTimestampRef.current = null;
     };
   }, [isActive]);
 
@@ -482,19 +409,21 @@ function RoomsSection({
         {/* Divider */}
         <div className="h-[1px] bg-[linear-gradient(90deg,var(--color-brand-gold),transparent)] mb-[32px]" />
 
-        {/* Animated Room Sequences */}
+        {/* Animated Room Sequences — only re-renders when slot changes (every 4s) */}
         <div className="relative min-h-[220px]">
           {ROOM_DATA.map((room, index) => {
-            const startT = index * 4;
-            const endT = startT + 4;
-            
+            // Compute animation sub-progress within this room's slot
+            const slotStart = index * ROOM_SLOT;
+            const t = elapsedRef.current - slotStart;
+            const isThisSlot = t >= 0 && t < ROOM_SLOT;
+
             let opacity = 0;
             let blur = 10;
             let translateY = 20;
             let pointerEvents: "none" | "auto" = "none";
 
-            if (localTime >= startT && localTime < endT) {
-              const t = localTime - startT;
+            // Only run animation math for the active and adjacent slots
+            if (isThisSlot) {
               pointerEvents = "auto";
               if (t < 1) {
                 // 0 to 1s: enter
@@ -525,20 +454,22 @@ function RoomsSection({
               left: 0,
               right: 0,
               pointerEvents,
-              willChange: "opacity, filter, transform",
             };
 
+            // Render all 4 but only the visible ones have opacity > 0
+            // Use activeRoomIndex as part of the key to ensure React sees this as
+            // needing a re-render when the slot changes
+            const _ = activeRoomIndex; // consumed to satisfy React's render trigger
+
             return (
-              <div key={room.key} style={style}>
+              <div key={`${room.key}-${_}`} style={style}>
                 <h3 className="font-playfair text-[clamp(1.3rem,1.8vw,1.8rem)] text-brand-gold mb-[10px] [text-shadow:0_2px_10px_rgba(0,0,0,0.9)]">
                   {room.name}
                 </h3>
                 <p className="font-cormorant text-[clamp(0.95rem,1.2vw,1.1rem)] text-white/90 leading-[1.7] mb-[24px] [text-shadow:0_2px_12px_rgba(0,0,0,0.9),0_0_24px_rgba(0,0,0,0.7)]">
                   {room.description}
                 </p>
-                <GoldButton
-                  onClick={() => onBookingRequest?.(room.key)}
-                >
+                <GoldButton onClick={() => onBookingRequest?.(room.key)}>
                   BOOK {room.name.toUpperCase()}
                 </GoldButton>
               </div>
@@ -550,46 +481,7 @@ function RoomsSection({
   );
 }
 
-// ─── Chapter 5 → Banquet ──────────────────────────────────────────────────────
-
-function BanquetSection({
-  progress,
-  onBookingRequest,
-}: {
-  progress: number;
-  onBookingRequest?: (ctx: string) => void;
-}) {
-  const animStyle = useCinematicText(progress, { approachEnd: 0.2, readingEnd: 0.72 });
-
-  return (
-    <SectionShell side="right">
-      <ContentBlock animStyle={animStyle}>
-        <SubTag>
-          Weddings. Celebrations. Milestones. All at their most magnificent.
-        </SubTag>
-        <GoldRule />
-        <SectionHeadline>
-          Your Greatest Moments Deserve a Grand Stage
-        </SectionHeadline>
-        <SectionBody>
-          The Blackstone Banquet Hall is a canvas for life&apos;s most
-          extraordinary chapters. With 200+ guests, a 40-foot ceiling, and
-          bespoke event styling available from our in-house décor team, every
-          celebration here is tailored to the individual. Wedding mandaps,
-          corporate galas, milestone birthdays — our hall transforms to tell
-          your story.
-        </SectionBody>
-        <GoldButton onClick={() => onBookingRequest?.("banquet")}>
-          Plan Your Event
-        </GoldButton>
-      </ContentBlock>
-    </SectionShell>
-  );
-}
-
 // ─── Chapter 6 → Contact ──────────────────────────────────────────────────────
-
-
 
 function ContactSection({ progress }: { progress: number }) {
   const animStyle = useCinematicText(progress, {
@@ -622,7 +514,7 @@ function ContactSection({ progress }: { progress: number }) {
       {menuOpen === "contact" && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-[20px] bg-black/80 backdrop-blur-md pointer-events-auto transition-opacity duration-300">
           <div className="bg-[#0a0a0a] border border-brand-gold/30 p-[clamp(30px,4vw,50px)] max-w-[600px] w-full relative shadow-[0_0_50px_rgba(0,0,0,0.8)]">
-            <button 
+            <button
               onClick={() => setMenuOpen(null)}
               className="absolute top-[20px] right-[20px] text-brand-gold/60 hover:text-brand-gold text-[20px] transition-colors cursor-pointer"
               aria-label="Close"
@@ -638,7 +530,7 @@ function ContactSection({ progress }: { progress: number }) {
                 Contact Information
               </h3>
             </div>
-            
+
             <div className="grid grid-cols-1 gap-[16px]">
               {[
                 { icon: "📞", label: "Phone", value: "+91 82382 82341 / +91 82382 82361" },
@@ -661,7 +553,7 @@ function ContactSection({ progress }: { progress: number }) {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-[40px] flex justify-center">
               <GoldButton onClick={() => setMenuOpen(null)}>
                 Close
@@ -675,7 +567,7 @@ function ContactSection({ progress }: { progress: number }) {
       {(menuOpen === "dining" || menuOpen === "banquet") && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-[20px] bg-black/80 backdrop-blur-md pointer-events-auto transition-opacity duration-300">
           <div className="bg-[#0a0a0a] border border-brand-gold/30 p-[clamp(30px,4vw,50px)] max-w-[700px] w-full text-center relative shadow-[0_0_50px_rgba(0,0,0,0.8)]">
-            <button 
+            <button
               onClick={() => setMenuOpen(null)}
               className="absolute top-[20px] right-[20px] text-brand-gold/60 hover:text-brand-gold text-[20px] transition-colors cursor-pointer"
               aria-label="Close menu"
@@ -692,11 +584,11 @@ function ContactSection({ progress }: { progress: number }) {
               {menuOpen === "dining" ? "Dining Menu" : "Banquet Menu"}
             </h3>
             <p className="font-cormorant text-[clamp(1rem,1.2vw,1.1rem)] text-white/70 mb-[40px] max-w-[400px] mx-auto">
-              {menuOpen === "dining" 
-                ? "An exquisite selection of regional specialties and global cuisine, crafted to perfection." 
+              {menuOpen === "dining"
+                ? "An exquisite selection of regional specialties and global cuisine, crafted to perfection."
                 : "Bespoke catering packages and curated multi-course experiences for your grandest celebrations."}
             </p>
-            
+
             {/* Menu Placeholder */}
             <div className="aspect-[1/1.4] sm:aspect-[16/9] w-full border border-white/10 bg-[linear-gradient(135deg,#111,#000)] flex flex-col items-center justify-center p-[20px] relative overflow-hidden">
               <div className="absolute inset-[10px] border border-brand-gold/10 pointer-events-none" />
@@ -705,7 +597,7 @@ function ContactSection({ progress }: { progress: number }) {
                 {menuOpen === "dining" ? "Menu Content Currently Under Review by Executive Chef" : "Banquet Packages and Pricing Available Upon Request"}
               </span>
             </div>
-            
+
             <div className="mt-[40px] flex justify-center">
               <GoldButton onClick={() => setMenuOpen(null)}>
                 Close Menu
@@ -726,12 +618,8 @@ export function ChapterViews({ chapterIndex, progress, onBookingRequest }: Chapt
       return <ReceptionSection progress={progress} onBookingRequest={onBookingRequest} />;
     case 2:
       return <DiningSection progress={progress} onBookingRequest={onBookingRequest} />;
-    case 3:
-      return <ElevatorSection progress={progress} onBookingRequest={onBookingRequest} />;
     case 4:
       return <RoomsSection progress={progress} onBookingRequest={onBookingRequest} />;
-    case 5:
-      return <BanquetSection progress={progress} onBookingRequest={onBookingRequest} />;
     case 6:
       return <ContactSection progress={progress} />;
     default:

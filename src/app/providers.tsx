@@ -28,20 +28,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
       gsap.ticker.add(updateLenis);
       gsap.ticker.lagSmoothing(0);
 
+      // Set state in the SAME effect, after full setup — avoids Strict Mode stale ref
+      setLenis(lenisInstance);
+
       return () => {
         lenisInstance.destroy();
         gsap.ticker.remove(updateLenis);
         lenisRef.current = null;
+        setLenis(null);
       };
     } catch (error) {
       console.warn("Animation initialisation failed:", error);
     }
-  }, []);
-
-  // Sync the ref value into state in a separate effect so the context
-  // value updates after the Lenis instance has been fully configured.
-  useEffect(() => {
-    setLenis(lenisRef.current);
   }, []);
 
   return <LenisProvider lenis={lenis}>{children}</LenisProvider>;

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { GoldRule, SubTag } from "@/components/ui/DesignSystem";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,41 +34,14 @@ const contextToRoomType: Record<string, RoomType> = {
 const GUEST_OPTIONS = ["1", "2", "3", "4", "5", "6", "7", "8+"] as const;
 const ROOM_OPTIONS: RoomType[] = ["Club Room", "Quad Room", "Suite Room", "Super Deluxe Room"];
 
-// ─── Design constants ─────────────────────────────────────────────────────────
-
+// Local color helpers — used for form inputs and inline structural styles
+// (GoldRule and SubTag now come from the shared DesignSystem)
 const GOLD = "#d4af37";
 const GOLD_ALPHA = (a: number) => `rgba(212,175,55,${a})`;
 const WHITE_ALPHA = (a: number) => `rgba(255,255,255,${a})`;
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function GoldRule({ width = 48 }: { width?: number }) {
-  return (
-    <div
-      style={{
-        width,
-        height: "1px",
-        background: `linear-gradient(90deg, ${GOLD}, ${GOLD_ALPHA(0.25)})`,
-        marginBottom: "18px",
-      }}
-    />
-  );
-}
 
-function SubTag({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{
-      fontFamily: "'Geist Sans', sans-serif",
-      fontSize: "9px",
-      letterSpacing: "0.35em",
-      textTransform: "uppercase",
-      color: GOLD_ALPHA(0.7),
-      margin: "0 0 8px 0",
-    }}>
-      {children}
-    </p>
-  );
-}
 
 // ─── ContactModal ─────────────────────────────────────────────────────────────
 

@@ -14,9 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hotal Demo — Luxury Hotel Experience",
+  title: {
+    default: "The Blackstone Hotel — Rajkot",
+    template: "%s | The Blackstone Hotel",
+  },
   description:
-    "An immersive scroll-driven hotel showcase built with Next.js and canvas-based frame animation.",
+    "Luxury hotel in Rajkot, Gujarat. Premium rooms, fine dining, world-class banquet facilities, and 24/7 concierge service. Where luxury meets legacy.",
 };
 
 export default function RootLayout({

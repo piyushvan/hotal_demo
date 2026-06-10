@@ -1,21 +1,21 @@
 'use client';
 
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, CSSProperties } from 'react';
 import { HeroOverlay } from "@/components/sections/HeroOverlay";
 import { ChapterViews } from "@/components/sections/ChapterViews";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type TransitionStyle = 'warp' | 'blend' | 'none';
-type OverlayType = 'hero' | 'reception' | 'dining' | 'elevator' | 'rooms' | 'banquet' | 'contact';
+
+// Only types that are actually wired up in page.tsx
+type OverlayType = 'hero' | 'reception' | 'dining' | 'rooms' | 'contact';
 
 const CHAPTER_INDEX: Record<OverlayType, number | null> = {
-  hero:      null, // uses HeroOverlay
+  hero:      null, // uses HeroOverlay directly
   reception: 1,
   dining:    2,
-  elevator:  3,
   rooms:     4,
-  banquet:   5,
   contact:   6,
 };
 
@@ -25,6 +25,7 @@ export default function ScrollVideo({
   src,
   zIndex = 1,
   className = "top-0 left-0",
+  style,
   enterStyle = 'warp',
   exitStyle = 'warp',
   overlayType,
@@ -32,6 +33,7 @@ export default function ScrollVideo({
   src: string;
   zIndex?: number;
   className?: string;
+  style?: CSSProperties;
   enterStyle?: TransitionStyle;
   exitStyle?: TransitionStyle;
   overlayType?: OverlayType;
@@ -118,7 +120,8 @@ export default function ScrollVideo({
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    const video     = videoRef.current;
+    if (!container || !video) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -127,14 +130,17 @@ export default function ScrollVideo({
         isVisibleRef.current = entry.isIntersecting;
 
         if (entry.isIntersecting && !wasVisible) {
+          // Promote to GPU layer only while visible (Fix #4 — willChange optimization)
+          video.style.willChange = 'transform, opacity, filter';
           // Start the rAF loop
           rafIdRef.current = requestAnimationFrame(tick);
         } else if (!entry.isIntersecting && wasVisible) {
-          // Stop the rAF loop — section is off screen
+          // Stop the rAF loop and release GPU layer
           if (rafIdRef.current !== null) {
             cancelAnimationFrame(rafIdRef.current);
             rafIdRef.current = null;
           }
+          video.style.willChange = 'auto';
         }
       },
       {
@@ -152,6 +158,7 @@ export default function ScrollVideo({
         cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = null;
       }
+      video.style.willChange = 'auto';
     };
   }, [tick]);
 
@@ -191,7 +198,7 @@ export default function ScrollVideo({
     <div
       ref={containerRef}
       className={`absolute w-full h-[800vh] ${className}`}
-      style={{ zIndex }}
+      style={{ zIndex, ...style }}
     >
       <div className="sticky top-0 w-full h-screen overflow-hidden">
         <video
@@ -200,11 +207,11 @@ export default function ScrollVideo({
           className="w-full h-full object-cover"
           muted
           playsInline
-          // Start hidden; opacity is controlled via JS
           preload="none"
           style={{
+            // Start hidden; opacity is controlled via JS
+            // willChange is toggled dynamically in the IntersectionObserver (Fix #4)
             opacity: 0,
-            willChange: 'transform, opacity, filter',
           }}
         />
 
