@@ -55,6 +55,8 @@ export default function ScrollVideo({
   // Refs for tracking DOM and seek state for performance
   const isInitializedRef = useRef(false);
   const animatedProgressRef = useRef(0);
+  const velocityRef = useRef(0);          // spring velocity (units/s)
+  const lastTimeRef = useRef<number>(-1); // for delta-time calculation
   const lastAppliedTimeRef = useRef(-1);
   const lastAppliedOpacityRef = useRef(-1);
   const lastAppliedScaleRef = useRef(-1);
@@ -83,21 +85,41 @@ export default function ScrollVideo({
     let targetProgress = scrolled / scrollableDistance;
     targetProgress = Math.max(0, Math.min(1, targetProgress));
 
+    // ── Delta-time: physics is frame-rate independent ──
+    const now = performance.now();
+    const dt = lastTimeRef.current < 0 ? 0.016 : Math.min((now - lastTimeRef.current) / 1000, 0.064); // clamp to 64ms max
+    lastTimeRef.current = now;
+
     // Initialize/snap animated progress on first tick to prevent jump-in animations
     if (!isInitializedRef.current) {
       animatedProgressRef.current = targetProgress;
+      velocityRef.current = 0;
       isInitializedRef.current = true;
     }
 
-    // Smooth progress using linear interpolation (lerp)
-    // 0.05 offers a good balance of responsiveness and buttery smoothness for reduced scroll speed
-    const lerpFactor = 0.05;
-    let currentProgress = animatedProgressRef.current + (targetProgress - animatedProgressRef.current) * lerpFactor;
+    // ── Spring Physics Model ──────────────────────────────────────────────────
+    // stiffness: how eagerly the spring chases the target (higher = snappier)
+    // damping:   how quickly velocity bleeds off (higher = less oscillation)
+    // A critically-damped spring (damping ≈ 2*sqrt(stiffness)) gives silky
+    // deceleration with zero overshoot — ideal for scroll scrubbing.
+    const stiffness = 120; // spring constant (units/s²)
+    const damping = 22;    // damping coefficient (units/s)
 
-    // Snap to target if extremely close to avoid infinite minor updates
-    if (Math.abs(currentProgress - targetProgress) < 0.0001) {
+    const displacement = targetProgress - animatedProgressRef.current;
+    const springForce = stiffness * displacement;
+    const dampingForce = damping * velocityRef.current;
+
+    velocityRef.current += (springForce - dampingForce) * dt;
+    let currentProgress = animatedProgressRef.current + velocityRef.current * dt;
+
+    // Snap to target when both position error and velocity are negligible
+    if (Math.abs(currentProgress - targetProgress) < 0.00005 && Math.abs(velocityRef.current) < 0.0005) {
       currentProgress = targetProgress;
+      velocityRef.current = 0;
     }
+
+    // Hard-clamp to prevent floating point from ever escaping [0, 1]
+    currentProgress = Math.max(0, Math.min(1, currentProgress));
 
     animatedProgressRef.current = currentProgress;
 
@@ -185,6 +207,8 @@ export default function ScrollVideo({
           }
           video.style.willChange = 'auto';
           isInitializedRef.current = false; // Reset to allow snapping when returning
+          velocityRef.current = 0;          // Drain spring velocity when off-screen
+          lastTimeRef.current = -1;         // Reset dt on next entry
         }
       },
       {
