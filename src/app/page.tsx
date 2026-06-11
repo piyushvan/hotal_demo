@@ -15,17 +15,17 @@ export const metadata: Metadata = {
 // Each section is SECTION_H vh tall with a sticky video inside.
 // Sections overlap by SECTION_OVERLAP vh so transitions blend cleanly.
 // Total scroll height = SECTION_STEP * (count - 1) + SECTION_H
-const SECTION_H    = 800; // vh — height of each scroll-video section
-const SECTION_STEP = 665; // vh — distance between each section's start point (overlap = 135vh)
+const SECTION_H = 1200; // vh — height of each scroll-video section
+const SECTION_STEP = 1000; // vh — distance between each section's start point (overlap = 200vh)
 const SECTION_COUNT = 5;
-const TOTAL_H = SECTION_STEP * (SECTION_COUNT - 1) + SECTION_H; // 3460vh
+const TOTAL_H = SECTION_STEP * (SECTION_COUNT - 1) + SECTION_H; // 5200vh
 
 const SECTIONS = [
-  { src: "/scrolling/part1_scroll.mp4", enter: "none"  as const, exit: "warp"  as const, overlay: "hero"      as const },
-  { src: "/scrolling/part2_scroll.mp4", enter: "warp"  as const, exit: "blend" as const, overlay: "reception" as const },
-  { src: "/scrolling/part3_scroll.mp4", enter: "blend" as const, exit: "blend" as const, overlay: "dining"    as const },
-  { src: "/scrolling/part4_scroll.mp4", enter: "blend" as const, exit: "warp"  as const, overlay: "rooms"     as const },
-  { src: "/scrolling/part5_scroll.mp4", enter: "warp"  as const, exit: "none"  as const, overlay: "contact"   as const },
+  { src: "/scrolling/part1_scroll.mp4", enter: "none" as const, exit: "warp" as const, overlay: "hero" as const },
+  { src: "/scrolling/part2_scroll.mp4", enter: "warp" as const, exit: "blend" as const, overlay: "reception" as const },
+  { src: "/scrolling/part3_scroll.mp4", enter: "blend" as const, exit: "blend" as const, overlay: "dining" as const },
+  { src: "/scrolling/part4_scroll.mp4", enter: "blend" as const, exit: "warp" as const, overlay: "rooms" as const },
+  { src: "/scrolling/part5_scroll.mp4", enter: "warp" as const, exit: "none" as const, overlay: "contact" as const },
 ];
 
 export default function Home() {
@@ -34,7 +34,7 @@ export default function Home() {
       {/*
         ── Chunked Video Scroll Experience ──
         Five scroll-driven video sections stacked vertically with intentional overlap.
-        Each section is 800vh tall; starts are 665vh apart (135vh overlap for transitions).
+        Each section is 1200vh tall; starts are 1000vh apart (200vh overlap for transitions).
         Videos only preload when near the viewport (IntersectionObserver).
       */}
       <div className="relative w-full" style={{ height: `${TOTAL_H}vh` }}>
@@ -49,6 +49,7 @@ export default function Home() {
             enterStyle={s.enter}
             exitStyle={s.exit}
             overlayType={s.overlay}
+            height={SECTION_H}
           />
         ))}
       </div>

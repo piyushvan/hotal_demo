@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useEffect, useState, useCallback, CSSProperties } from 'react';
-import { HeroOverlay } from "@/components/sections/HeroOverlay";
-import { ChapterViews } from "@/components/sections/ChapterViews";
+import { useRef, useEffect, useCallback, CSSProperties } from 'react';
+import { HeroOverlay, HeroOverlayRef } from "@/components/sections/HeroOverlay";
+import { ChapterViews, ChapterViewsRef } from "@/components/sections/ChapterViews";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -12,11 +12,11 @@ type TransitionStyle = 'warp' | 'blend' | 'none';
 type OverlayType = 'hero' | 'reception' | 'dining' | 'rooms' | 'contact';
 
 const CHAPTER_INDEX: Record<OverlayType, number | null> = {
-  hero:      null, // uses HeroOverlay directly
+  hero: null, // uses HeroOverlay directly
   reception: 1,
-  dining:    2,
-  rooms:     4,
-  contact:   6,
+  dining: 2,
+  rooms: 4,
+  contact: 6,
 };
 
 // ─── ScrollVideo ──────────────────────────────────────────────────────────────
@@ -30,6 +30,8 @@ export default function ScrollVideo({
   exitStyle = 'warp',
   overlayType,
   id,
+  onBookingRequest,
+  height = 800,
 }: {
   src: string;
   zIndex?: number;
@@ -39,76 +41,115 @@ export default function ScrollVideo({
   exitStyle?: TransitionStyle;
   overlayType?: OverlayType;
   id?: string;
+  onBookingRequest?: (context: string) => void;
+  height?: number;
 }) {
-  // React state is only used for driving overlay components.
-  // Video opacity/scale/blur are written directly to DOM for zero-GC perf.
-  const [progressState, setProgressState] = useState(0);
-
   const containerRef = useRef<HTMLDivElement>(null);
-  const videoRef     = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const overlayRef = useRef<HeroOverlayRef | ChapterViewsRef | null>(null);
 
   // Whether this section is near/in the viewport — gated by IntersectionObserver
   const isVisibleRef = useRef(false);
-  const rafIdRef     = useRef<number | null>(null);
+  const rafIdRef = useRef<number | null>(null);
 
-  // Track the last React progress we set so we only setState when it meaningfully changes
-  const lastReactProgressRef = useRef(-1);
+  // Refs for tracking DOM and seek state for performance
+  const isInitializedRef = useRef(false);
+  const animatedProgressRef = useRef(0);
+  const lastAppliedTimeRef = useRef(-1);
+  const lastAppliedOpacityRef = useRef(-1);
+  const lastAppliedScaleRef = useRef(-1);
+  const lastAppliedBlurRef = useRef(-1);
 
   // ─── Tick: runs inside rAF, only when visible ──────────────────────────────
 
-  const tickRef = useRef<() => void>(() => {});
+  const tickRef = useRef<() => void>(() => { });
 
   const tick = useCallback(() => {
+    if (!isVisibleRef.current) return;
+
     const container = containerRef.current;
-    const video     = videoRef.current;
+    const video = videoRef.current;
 
     if (!container || !video || isNaN(video.duration)) {
       rafIdRef.current = requestAnimationFrame(tickRef.current);
       return;
     }
 
-    const rect             = container.getBoundingClientRect();
-    const windowHeight     = window.innerHeight;
+    const rect = container.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
     const scrollableDistance = rect.height - windowHeight;
-    const scrolled         = -rect.top;
+    const scrolled = -rect.top;
 
-    let progress = scrolled / scrollableDistance;
-    progress = Math.max(0, Math.min(1, progress));
+    let targetProgress = scrolled / scrollableDistance;
+    targetProgress = Math.max(0, Math.min(1, targetProgress));
+
+    // Initialize/snap animated progress on first tick to prevent jump-in animations
+    if (!isInitializedRef.current) {
+      animatedProgressRef.current = targetProgress;
+      isInitializedRef.current = true;
+    }
+
+    // Smooth progress using linear interpolation (lerp)
+    // 0.05 offers a good balance of responsiveness and buttery smoothness for reduced scroll speed
+    const lerpFactor = 0.05;
+    let currentProgress = animatedProgressRef.current + (targetProgress - animatedProgressRef.current) * lerpFactor;
+
+    // Snap to target if extremely close to avoid infinite minor updates
+    if (Math.abs(currentProgress - targetProgress) < 0.0001) {
+      currentProgress = targetProgress;
+    }
+
+    animatedProgressRef.current = currentProgress;
 
     // ── Update video time ──
-    video.currentTime = progress * video.duration;
+    const targetTime = currentProgress * video.duration;
+    // Only write to currentTime if it has changed by more than 1ms
+    if (Math.abs(targetTime - lastAppliedTimeRef.current) > 0.001) {
+      video.currentTime = targetTime;
+      lastAppliedTimeRef.current = targetTime;
+    }
 
     // ── Apply visual transitions directly to DOM (no React re-render) ──
     let opacity = 1;
-    let scale   = 1;
-    let blur    = 0;
+    let scale = 1;
+    let blur = 0;
     const threshold = 0.05;
 
-    if (progress < threshold && enterStyle !== 'none') {
-      const t = progress / threshold;
+    if (currentProgress < threshold && enterStyle !== 'none') {
+      const t = currentProgress / threshold;
       opacity = t;
       if (enterStyle === 'warp') {
         scale = 1.2 - 0.2 * t;
-        blur  = 15 * (1 - t);
+        blur = 15 * (1 - t);
       }
-    } else if (progress > 1 - threshold && exitStyle !== 'none') {
-      const t = (progress - (1 - threshold)) / threshold;
+    } else if (currentProgress > 1 - threshold && exitStyle !== 'none') {
+      const t = (currentProgress - (1 - threshold)) / threshold;
       opacity = 1 - t;
       if (exitStyle === 'warp') {
         scale = 1 + 0.2 * t;
-        blur  = 15 * t;
+        blur = 15 * t;
       }
     }
 
-    video.style.opacity   = String(opacity);
-    video.style.transform = `scale(${scale})`;
-    video.style.filter    = blur > 0.1 ? `blur(${blur}px)` : 'none';
+    // Only update styles if they have changed past a tolerance threshold
+    if (Math.abs(opacity - lastAppliedOpacityRef.current) > 0.001) {
+      video.style.opacity = String(opacity);
+      lastAppliedOpacityRef.current = opacity;
+    }
 
-    // ── Throttle React state: only update if progress changed by ≥ 0.001 ──
-    const rounded = Math.round(progress * 1000) / 1000;
-    if (Math.abs(rounded - lastReactProgressRef.current) >= 0.001) {
-      lastReactProgressRef.current = rounded;
-      setProgressState(rounded);
+    if (Math.abs(scale - lastAppliedScaleRef.current) > 0.001) {
+      video.style.transform = `scale(${scale})`;
+      lastAppliedScaleRef.current = scale;
+    }
+
+    if (Math.abs(blur - lastAppliedBlurRef.current) > 0.1) {
+      video.style.filter = blur > 0.1 ? `blur(${blur}px)` : 'none';
+      lastAppliedBlurRef.current = blur;
+    }
+
+    // ── Update overlay via Ref (bypasses React render loop) ──
+    if (overlayRef.current) {
+      overlayRef.current.update(currentProgress);
     }
 
     rafIdRef.current = requestAnimationFrame(tickRef.current);
@@ -122,7 +163,7 @@ export default function ScrollVideo({
 
   useEffect(() => {
     const container = containerRef.current;
-    const video     = videoRef.current;
+    const video = videoRef.current;
     if (!container || !video) return;
 
     const observer = new IntersectionObserver(
@@ -143,6 +184,7 @@ export default function ScrollVideo({
             rafIdRef.current = null;
           }
           video.style.willChange = 'auto';
+          isInitializedRef.current = false; // Reset to allow snapping when returning
         }
       },
       {
@@ -161,14 +203,15 @@ export default function ScrollVideo({
         rafIdRef.current = null;
       }
       video.style.willChange = 'auto';
+      isInitializedRef.current = false;
     };
   }, [tick]);
 
-  // ─── Lazy preload: switch from "none" to "auto" when near viewport ────────
+  // ─── Lazy preload: switch from "metadata" to "auto" when near viewport ──
 
   useEffect(() => {
     const container = containerRef.current;
-    const video     = videoRef.current;
+    const video = videoRef.current;
     if (!container || !video) return;
 
     const preloadObserver = new IntersectionObserver(
@@ -200,8 +243,8 @@ export default function ScrollVideo({
     <div
       ref={containerRef}
       id={id}
-      className={`absolute w-full h-[800vh] ${className}`}
-      style={{ zIndex, ...style }}
+      className={`absolute w-full ${className}`}
+      style={{ height: `${height}vh`, zIndex, ...style }}
     >
       <div className="sticky top-0 w-full h-screen overflow-hidden">
         <video
@@ -210,7 +253,7 @@ export default function ScrollVideo({
           className="w-full h-full object-cover"
           muted
           playsInline
-          preload="none"
+          preload="metadata"
           style={{
             // Start hidden; opacity is controlled via JS
             // willChange is toggled dynamically in the IntersectionObserver (Fix #4)
@@ -221,12 +264,13 @@ export default function ScrollVideo({
         {/* Overlays */}
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-10">
           {overlayType === 'hero' && (
-            <HeroOverlay progress={progressState} />
+            <HeroOverlay ref={overlayRef} />
           )}
           {overlayType !== 'hero' && chapterIndex !== null && (
             <ChapterViews
+              ref={overlayRef}
               chapterIndex={chapterIndex}
-              progress={progressState}
+              onBookingRequest={onBookingRequest}
             />
           )}
         </div>

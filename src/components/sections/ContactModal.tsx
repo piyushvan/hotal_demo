@@ -62,17 +62,12 @@ export function ContactModal({ isOpen, context = "", onClose }: ContactModalProp
 
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
-  const [lastOpen, setLastOpen] = useState(false);
-  const [lastContext, setLastContext] = useState("");
-
-  if (isOpen && (!lastOpen || context !== lastContext)) {
-    setLastOpen(isOpen);
-    setLastContext(context);
-    setForm((prev) => ({ ...prev, roomType: contextToRoomType[context] ?? prev.roomType }));
-    setStatus("idle");
-  } else if (!isOpen && lastOpen) {
-    setLastOpen(false);
-  }
+  useEffect(() => {
+    if (isOpen) {
+      setForm((prev) => ({ ...prev, roomType: contextToRoomType[context] ?? prev.roomType }));
+      setStatus("idle");
+    }
+  }, [isOpen, context]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -89,6 +84,7 @@ export function ContactModal({ isOpen, context = "", onClose }: ContactModalProp
     if (!overlay) return;
     const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
     const focusableElements = overlay.querySelectorAll<HTMLElement>(focusableSelector);
+    if (!focusableElements.length) return;
     const firstFocusable = focusableElements[0];
     const lastFocusable = focusableElements[focusableElements.length - 1];
     firstFocusable?.focus();

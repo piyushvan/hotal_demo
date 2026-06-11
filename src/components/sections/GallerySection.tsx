@@ -1,32 +1,20 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 
 // ─── Gallery data — real hotel images from public/gallary ─────────────────────
 const GALLERY_IMAGES = [
-  { id: "g1",  src: "/gallary/image1.jpg",   alt: "The Blackstone Hotel",           category: "Lobby"    },
-  { id: "g2",  src: "/gallary/image2.jpg",   alt: "Hotel Entrance",                 category: "Exterior" },
   { id: "g3",  src: "/gallary/image3.jpg",   alt: "Grand Reception",                category: "Lobby"    },
-  { id: "g4",  src: "/gallary/image4.jpg",   alt: "Lobby Interior",                 category: "Lobby"    },
-  { id: "g5",  src: "/gallary/image5.jpg",   alt: "Hotel Corridor",                 category: "Lobby"    },
-  { id: "g6",  src: "/gallary/image6.jpg",   alt: "Reception Desk",                 category: "Lobby"    },
-  { id: "g7",  src: "/gallary/image7.jpg",   alt: "Hotel Common Area",              category: "Lobby"    },
-  { id: "g8",  src: "/gallary/image8.jpg",   alt: "Dining Hall",                    category: "Dining"   },
   { id: "g9",  src: "/gallary/image9.jpg",   alt: "Restaurant Interior",            category: "Dining"   },
-  { id: "g10", src: "/gallary/image10.jpeg", alt: "Fine Dining Setup",              category: "Dining"   },
   { id: "g11", src: "/gallary/image11.jpeg", alt: "Buffet Spread",                  category: "Dining"   },
   { id: "g12", src: "/gallary/image12.jpeg", alt: "Club Room",                      category: "Rooms"    },
   { id: "g13", src: "/gallary/image13.jpeg", alt: "Deluxe Room",                    category: "Rooms"    },
   { id: "g14", src: "/gallary/image14.jpeg", alt: "Suite Bedroom",                  category: "Rooms"    },
   { id: "g15", src: "/gallary/image15.jpeg", alt: "Room View",                      category: "Rooms"    },
   { id: "g16", src: "/gallary/image16.jpeg", alt: "Quad Room",                      category: "Rooms"    },
-  { id: "g17", src: "/gallary/image17.jpeg", alt: "Premium Suite",                  category: "Rooms"    },
-  { id: "g18", src: "/gallary/image18.jpeg", alt: "Room Bathroom",                  category: "Rooms"    },
-  { id: "g19", src: "/gallary/image19.jpeg", alt: "Banquet Hall",                   category: "Banquet"  },
   { id: "g20", src: "/gallary/image20.jpeg", alt: "Banquet Setup",                  category: "Banquet"  },
   { id: "g21", src: "/gallary/image21.jpg",  alt: "Wedding Hall",                   category: "Banquet"  },
-  { id: "g22", src: "/gallary/image22.jpeg", alt: "Event Decoration",               category: "Banquet"  },
   { id: "g23", src: "/gallary/image23.jpeg", alt: "Banquet Lighting",               category: "Banquet"  },
   { id: "g24", src: "/gallary/image24.jpg",  alt: "Corporate Event Setup",          category: "Banquet"  },
   { id: "g25", src: "/gallary/image25.jpeg", alt: "Hotel Exterior — Day",           category: "Exterior" },
@@ -34,12 +22,9 @@ const GALLERY_IMAGES = [
   { id: "g27", src: "/gallary/image27.jpeg", alt: "Hotel at Night",                 category: "Exterior" },
   { id: "g28", src: "/gallary/image28.jpeg", alt: "Parking Area",                   category: "Exterior" },
   { id: "g29", src: "/gallary/image29.jpeg", alt: "Surrounding Area",               category: "Exterior" },
-  { id: "g30", src: "/gallary/image30.jpeg", alt: "Hotel Garden / Amenities",       category: "Amenities"},
-  { id: "g31", src: "/gallary/image31.jpeg", alt: "Hotel Amenities",                category: "Amenities"},
-  { id: "g32", src: "/gallary/image32.jpeg", alt: "Special Features",               category: "Amenities"},
 ];
 
-const CATEGORIES = ["All", "Lobby", "Dining", "Rooms", "Banquet", "Exterior", "Amenities"];
+const CATEGORIES = ["All", "Lobby", "Dining", "Rooms", "Banquet", "Exterior"];
 
 // ─── Lightbox ─────────────────────────────────────────────────────────────────
 
@@ -52,16 +37,21 @@ interface LightboxProps {
 
 function Lightbox({ image, images, onClose, onNavigate }: LightboxProps) {
   const currentIndex = images.findIndex((i) => i.id === image.id);
+  const currentIndexRef = useRef(currentIndex);
+
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
 
   const goNext = useCallback(() => {
-    const next = images[(currentIndex + 1) % images.length];
+    const next = images[(currentIndexRef.current + 1) % images.length];
     onNavigate(next.id);
-  }, [currentIndex, images, onNavigate]);
+  }, [images, onNavigate]);
 
   const goPrev = useCallback(() => {
-    const prev = images[(currentIndex - 1 + images.length) % images.length];
+    const prev = images[(currentIndexRef.current - 1 + images.length) % images.length];
     onNavigate(prev.id);
-  }, [currentIndex, images, onNavigate]);
+  }, [images, onNavigate]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -155,9 +145,10 @@ function Lightbox({ image, images, onClose, onNavigate }: LightboxProps) {
 interface ThumbnailProps {
   image: typeof GALLERY_IMAGES[number];
   onClick: (id: string) => void;
+  priority?: boolean;
 }
 
-function GalleryThumbnail({ image, onClick }: ThumbnailProps) {
+function GalleryThumbnail({ image, onClick, priority = false }: ThumbnailProps) {
   return (
     <button
       type="button"
@@ -169,6 +160,7 @@ function GalleryThumbnail({ image, onClick }: ThumbnailProps) {
         src={image.src}
         alt={image.alt}
         fill
+        priority={priority}
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         className="w-full h-full object-cover block filter brightness-80 transition-all duration-400 ease-in-out group-hover:brightness-[1.08] group-hover:scale-[1.05]"
       />
@@ -269,11 +261,12 @@ export function GallerySection() {
 
       {/* Image Grid */}
       <div className="grid grid-cols-[repeat(auto-fill,minmax(clamp(200px,26vw,320px),1fr))] gap-[3px] max-w-[1400px] mx-auto">
-        {filtered.map((img) => (
+        {filtered.map((img, index) => (
           <GalleryThumbnail
             key={img.id}
             image={img}
             onClick={handleOpen}
+            priority={index < 6}
           />
         ))}
       </div>

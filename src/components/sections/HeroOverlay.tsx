@@ -1,72 +1,123 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { forwardRef, useImperativeHandle, useRef } from "react";
+import { gsap } from "gsap";
 
-export interface HeroOverlayProps {
-  /** 0–1 progress within the hero chapter. */
-  progress: number;
+export interface HeroOverlayRef {
+  update: (progress: number) => void;
 }
 
-export function HeroOverlay({ progress }: HeroOverlayProps) {
-  // Walking text effect: text grows as user approaches (0→0.5), 
-  // then fades and shrinks slightly as user passes (0.5→1)
-  const { opacity, scale, translateY, blur } = useMemo(() => {
-    // Phase 1: Approach — text materializes (0 → 0.45)
-    // Phase 2: Reading zone — full opacity (0.45 → 0.65)
-    // Phase 3: Receding — text fades as you walk past (0.65 → 1)
-    let opacity = 0;
-    let scale = 0.8;
-    let translateY = 0;
-    let blur = 8;
+export const HeroOverlay = forwardRef<HeroOverlayRef, {}>((props, ref) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const ruleTopRef = useRef<HTMLDivElement>(null);
+  const ruleBottomRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const taglineRef = useRef<HTMLParagraphElement>(null);
+  const scrollCueRef = useRef<HTMLDivElement>(null);
 
-    if (progress < 0.45) {
-      // Approaching: scale from 0.8 → 1, blur clears, opacity rises
-      const t = progress / 0.45;
-      const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // ease-in-out
-      opacity = eased;
-      scale = 0.8 + eased * 0.2;
-      blur = (1 - eased) * 8;
-      translateY = (1 - eased) * 30;
-    } else if (progress < 0.65) {
-      // Reading zone: fully visible
-      opacity = 1;
-      scale = 1;
-      blur = 0;
-      translateY = 0;
-    } else {
-      // Receding: scale up slightly (going past), fade out
-      const t = (progress - 0.65) / 0.35;
-      const eased = t * t; // ease-in
-      opacity = 1 - eased;
-      scale = 1 + eased * 0.08; // slight scale up as you "walk past"
-      blur = eased * 6;
-      translateY = -eased * 20;
+  const settersRef = useRef<{
+    opacity?: any;
+    y?: any;
+    scale?: any;
+    blur?: any;
+    ruleTopWidth?: any;
+    ruleBottomWidth?: any;
+    letterSpacing?: any;
+    taglineOpacity?: any;
+    scrollCueOpacity?: any;
+  }>({});
+
+  const initSetters = () => {
+    if (settersRef.current.opacity) return; // already initialized
+    if (!containerRef.current) return;
+
+    settersRef.current = {
+      opacity: gsap.quickSetter(containerRef.current, "opacity"),
+      y: gsap.quickSetter(containerRef.current, "y", "px"),
+      scale: gsap.quickSetter(containerRef.current, "scale"),
+      blur: gsap.quickSetter(containerRef.current, "filter"),
+      ruleTopWidth: gsap.quickSetter(ruleTopRef.current, "width", "px"),
+      ruleBottomWidth: gsap.quickSetter(ruleBottomRef.current, "width", "px"),
+      letterSpacing: gsap.quickSetter(titleRef.current, "letterSpacing"),
+      taglineOpacity: gsap.quickSetter(taglineRef.current, "opacity"),
+      scrollCueOpacity: gsap.quickSetter(scrollCueRef.current, "opacity"),
+    };
+  };
+
+  useImperativeHandle(ref, () => ({
+    update: (progress: number) => {
+      initSetters();
+      const s = settersRef.current;
+      if (!s.opacity) return;
+
+      // Phase 1: Approach — text materializes (0 → 0.45)
+      // Phase 2: Reading zone — full opacity (0.45 → 0.65)
+      // Phase 3: Receding — text fades as you walk past (0.65 → 1)
+      let opacity = 0;
+      let scale = 0.8;
+      let y = 30;
+      let blurVal = 8;
+
+      if (progress < 0.45) {
+        const t = progress / 0.45;
+        const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        opacity = eased;
+        scale = 0.8 + eased * 0.2;
+        blurVal = (1 - eased) * 8;
+        y = (1 - eased) * 30;
+      } else if (progress < 0.65) {
+        opacity = 1;
+        scale = 1;
+        blurVal = 0;
+        y = 0;
+      } else {
+        const t = (progress - 0.65) / 0.35;
+        const eased = t * t;
+        opacity = 1 - eased;
+        scale = 1 + eased * 0.08;
+        blurVal = eased * 6;
+        y = -eased * 20;
+      }
+
+      s.opacity(opacity);
+      s.scale(scale);
+      s.y(y);
+      s.blur(blurVal > 0.2 ? `blur(${blurVal}px)` : "none");
+
+      // Animated rule widths (top and bottom)
+      let ruleWidth = 120;
+      if (progress < 0.3) {
+        ruleWidth = Math.min(120, (progress / 0.3) * 120);
+      } else if (progress > 0.7) {
+        ruleWidth = Math.max(0, 120 - ((progress - 0.7) / 0.3) * 120);
+      }
+      s.ruleTopWidth!(String(ruleWidth));
+      s.ruleBottomWidth!(String(ruleWidth));
+
+      // Letter spacing
+      const tSpacing = Math.min(1, progress / 0.5);
+      const letterSpacing = 0.2 + tSpacing * 0.25;
+      s.letterSpacing!(`${letterSpacing}em`);
+
+      // Tagline opacity
+      const taglineOpacity = progress > 0.1 ? Math.min(1, (progress - 0.1) / 0.2) : 0;
+      s.taglineOpacity!(taglineOpacity);
+
+      // Scroll cue opacity
+      const scrollCueOpacity = progress < 0.08 ? 1 : Math.max(0, 1 - (progress - 0.08) / 0.1);
+      s.scrollCueOpacity!(scrollCueOpacity);
     }
-
-    return { opacity, scale, translateY, blur };
-  }, [progress]);
-
-  // Animated rule width
-  const ruleWidth = useMemo(() => {
-    if (progress < 0.3) return Math.min(120, (progress / 0.3) * 120);
-    if (progress > 0.7) return Math.max(0, 120 - ((progress - 0.7) / 0.3) * 120);
-    return 120;
-  }, [progress]);
-
-  // Letter spacing opens as text appears
-  const letterSpacing = useMemo(() => {
-    const t = Math.min(1, progress / 0.5);
-    return 0.2 + t * 0.25;
-  }, [progress]);
+  }));
 
   return (
     <div
+      ref={containerRef}
       aria-label="The Blackstone Hotel — hero title"
       className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10"
       style={{
-        opacity,
-        transform: `translateY(${translateY}px) scale(${scale})`,
-        filter: blur > 0.2 ? `blur(${blur}px)` : "none",
+        opacity: 0,
+        transform: "translateY(30px) scale(0.8)",
+        filter: "blur(8px)",
         transition: "none",
         willChange: "opacity, transform, filter",
       }}
@@ -74,8 +125,9 @@ export function HeroOverlay({ progress }: HeroOverlayProps) {
       {/* Top decorative structure */}
       <div className="flex flex-col items-center gap-0 mb-[clamp(16px,2.5vh,32px)]">
         <div
+          ref={ruleTopRef}
           style={{
-            width: `${ruleWidth}px`,
+            width: "0px",
             height: "1px",
             background:
               "linear-gradient(90deg, transparent, rgba(212,175,55,0.9), transparent)",
@@ -95,8 +147,9 @@ export function HeroOverlay({ progress }: HeroOverlayProps) {
 
       {/* THE BLACKSTONE — Main title */}
       <h1
+        ref={titleRef}
         className="font-playfair text-[clamp(2rem,5vw,4.5rem)] font-bold text-[var(--text-primary)] uppercase text-center m-0 leading-none [text-shadow:0_4px_24px_rgba(0,0,0,0.85),0_2px_10px_rgba(0,0,0,0.5)]"
-        style={{ letterSpacing: `${letterSpacing}em` }}
+        style={{ letterSpacing: "0.2em" }}
       >
         THE BLACKSTONE
       </h1>
@@ -135,8 +188,9 @@ export function HeroOverlay({ progress }: HeroOverlayProps) {
           className="w-[4px] h-[4px] bg-[rgba(212,175,55,0.5)] rotate-45 mb-[10px]"
         />
         <div
+          ref={ruleBottomRef}
           style={{
-            width: `${ruleWidth}px`,
+            width: "0px",
             height: "1px",
             background:
               "linear-gradient(90deg, transparent, rgba(212,175,55,0.9), transparent)",
@@ -146,16 +200,18 @@ export function HeroOverlay({ progress }: HeroOverlayProps) {
 
       {/* Tagline — appears after name */}
       <p
+        ref={taglineRef}
         className="font-cormorant text-[clamp(0.7rem,1.3vw,1.05rem)] font-medium text-white/85 tracking-[0.2em] text-center mt-[clamp(20px,3vh,36px)] italic [text-shadow:0_2px_12px_rgba(0,0,0,0.9),0_0_4px_rgba(0,0,0,0.6)]"
-        style={{ opacity: progress > 0.1 ? Math.min(1, (progress - 0.1) / 0.2) : 0 }}
+        style={{ opacity: 0 }}
       >
         Where luxury meets legacy
       </p>
 
       {/* Scroll cue */}
       <div
+        ref={scrollCueRef}
         className="absolute bottom-[clamp(28px,4vh,56px)] flex flex-col items-center gap-[10px] transition-opacity duration-400 ease"
-        style={{ opacity: progress < 0.08 ? 1 : Math.max(0, 1 - (progress - 0.08) / 0.1) }}
+        style={{ opacity: 1 }}
       >
         <span className="font-sans text-[9px] tracking-[0.3em] text-white/40 uppercase">
           Scroll to explore
@@ -164,4 +220,6 @@ export function HeroOverlay({ progress }: HeroOverlayProps) {
       </div>
     </div>
   );
-}
+});
+
+HeroOverlay.displayName = "HeroOverlay";

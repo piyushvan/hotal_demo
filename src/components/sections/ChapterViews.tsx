@@ -1,77 +1,18 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState, forwardRef, useImperativeHandle, useRef } from "react";
+import { gsap } from "gsap";
 import { GoldRule, SubTag, GoldButton } from "@/components/ui/DesignSystem";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface ChapterViewsProps {
   chapterIndex: number;
-  progress: number;
   onBookingRequest?: (context: string) => void;
 }
 
-// ─── Cinematic "Walking Text" Animation Hook ──────────────────────────────────
-//
-// Simulates the sensation of reading text while walking:
-// - Text starts small and blurred (far away)
-// - Grows and sharpens as you "approach" it
-// - Holds at full clarity during the reading zone
-// - Scales up very slightly and fades as you "walk past" it
-//
-function useCinematicText(
-  progress: number,
-  {
-    approachEnd = 0.22,
-    readingEnd = 0.72,
-    exitStagger = 0,
-  }: { approachEnd?: number; readingEnd?: number; exitStagger?: number } = {}
-): React.CSSProperties {
-  return useMemo(() => {
-    const p = Math.max(0, progress - exitStagger);
-
-    let opacity = 0;
-    let scale = 0.72;
-    let translateY = 32;
-    let blur = 10;
-
-    if (p <= 0) {
-      // Not yet visible
-      opacity = 0;
-      scale = 0.72;
-      translateY = 32;
-      blur = 10;
-    } else if (p < approachEnd) {
-      // Phase 1: Approaching — text comes toward you
-      const t = p / approachEnd;
-      const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // ease-in-out
-      opacity = e;
-      scale = 0.72 + e * 0.28;
-      translateY = (1 - e) * 32;
-      blur = (1 - e) * 10;
-    } else if (p < readingEnd) {
-      // Phase 2: Full clarity — reading zone
-      opacity = 1;
-      scale = 1;
-      translateY = 0;
-      blur = 0;
-    } else {
-      // Phase 3: Receding — text grows subtly (walking past) and fades
-      const t = (p - readingEnd) / (1 - readingEnd);
-      const e = t * t;
-      opacity = 1 - e;
-      scale = 1 + e * 0.12; // subtle "walking past" enlargement
-      translateY = -e * 18;
-      blur = e * 5;
-    }
-
-    return {
-      opacity,
-      transform: `translateY(${translateY}px) scale(${scale})`,
-      filter: blur > 0.5 ? `blur(${blur}px)` : "none",
-      willChange: "opacity, transform, filter",
-    };
-  }, [progress, approachEnd, readingEnd, exitStagger]);
+export interface ChapterViewsRef {
+  update: (progress: number) => void;
 }
 
 // ─── Transparent Section Shell ────────────────────────────────────────────────
@@ -106,17 +47,20 @@ function SectionShell({
 
 interface ContentBlockProps {
   children: React.ReactNode;
-  animStyle: React.CSSProperties;
   maxWidth?: string;
+  style?: React.CSSProperties;
 }
 
-function ContentBlock({ children, animStyle, maxWidth = "540px" }: ContentBlockProps) {
-  return (
-    <div style={{ ...animStyle, maxWidth, width: "100%" }}>
-      {children}
-    </div>
-  );
-}
+const ContentBlock = forwardRef<HTMLDivElement, ContentBlockProps>(
+  ({ children, maxWidth = "540px", style }, ref) => {
+    return (
+      <div ref={ref} style={{ ...style, maxWidth, width: "100%" }}>
+        {children}
+      </div>
+    );
+  }
+);
+ContentBlock.displayName = "ContentBlock";
 
 function SectionHeadline({ children }: { children: React.ReactNode }) {
   return (
@@ -134,63 +78,27 @@ function SectionBody({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ─── Custom Animation for Reception (Video 2) ───────────────────────────────
-function useReceptionAnimation(progress: number): React.CSSProperties {
-  return useMemo(() => {
-    let opacity = 0;
-    let translateX = 0;
-    let translateY = 0;
-    const scale = 0.85;
-    let blur = 0;
-
-    if (progress < 0.1) {
-      opacity = 0;
-      blur = 10;
-      translateY = 20;
-    } else if (progress < 0.2) {
-      const t = (progress - 0.1) / 0.1;
-      opacity = t;
-      blur = 10 * (1 - t);
-      translateY = 20 * (1 - t);
-    } else if (progress < 0.5) {
-      const t = (progress - 0.2) / 0.3;
-      opacity = 1;
-      translateX = t * 80;
-      blur = 0;
-    } else if (progress < 0.6) {
-      const t = (progress - 0.5) / 0.1;
-      opacity = 1 - t;
-      blur = t * 15;
-      translateX = 80 + t * 30;
-    } else {
-      opacity = 0;
-      blur = 10;
-    }
-
-    return {
-      opacity,
-      transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
-      transformOrigin: "right center",
-      filter: blur > 0.5 ? `blur(${blur}px)` : "none",
-      willChange: "opacity, transform, filter",
-    };
-  }, [progress]);
-}
-
-// ─── Chapter 1 → Reception ────────────────────────────────────────────────────
+// ─── Chapter 1 → Reception (Video 2) ──────────────────────────────────────────
 
 function ReceptionSection({
-  progress,
+  elementRef,
   onBookingRequest,
 }: {
-  progress: number;
+  elementRef: React.RefObject<HTMLDivElement | null>;
   onBookingRequest?: (ctx: string) => void;
 }) {
-  const animStyle = useReceptionAnimation(progress);
-
   return (
     <SectionShell side="right">
-      <ContentBlock animStyle={animStyle}>
+      <ContentBlock
+        ref={elementRef}
+        style={{
+          opacity: 0,
+          transform: "translate(0px, 20px) scale(0.85)",
+          transformOrigin: "right center",
+          filter: "blur(10px)",
+          willChange: "opacity, transform, filter",
+        }}
+      >
         <SubTag>A lobby that whispers heritage and roars luxury.</SubTag>
         <GoldRule />
         <SectionHeadline>Your Story Begins at First Light</SectionHeadline>
@@ -209,59 +117,27 @@ function ReceptionSection({
   );
 }
 
-// ─── Custom Animation for Dining (Video 3) ──────────────────────────────────
-function useDiningAnimation(progress: number): React.CSSProperties {
-  return useMemo(() => {
-    let opacity = 0;
-    let translateX = 0;
-    let translateY = 0;
-    const scale = 0.85;
-    let blur = 0;
-
-    if (progress < 0.1) {
-      const t = progress / 0.1;
-      opacity = t;
-      blur = 10 * (1 - t);
-      translateY = 20 * (1 - t);
-    } else if (progress < 0.5) {
-      const t = (progress - 0.1) / 0.4;
-      opacity = 1;
-      translateX = -(t * 20);
-      blur = 0;
-    } else if (progress < 0.7) {
-      const t = (progress - 0.5) / 0.2;
-      opacity = 1 - t;
-      blur = t * 15;
-      translateX = -20 - (t * 80);
-    } else {
-      opacity = 0;
-      blur = 10;
-    }
-
-    return {
-      opacity,
-      transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
-      transformOrigin: "left center",
-      filter: blur > 0.5 ? `blur(${blur}px)` : "none",
-      willChange: "opacity, transform, filter",
-    };
-  }, [progress]);
-}
-
-// ─── Chapter 2 → Dining ───────────────────────────────────────────────────────
+// ─── Chapter 2 → Dining (Video 3) ─────────────────────────────────────────────
 
 function DiningSection({
-  progress,
+  elementRef,
   onBookingRequest,
 }: {
-  progress: number;
+  elementRef: React.RefObject<HTMLDivElement | null>;
   onBookingRequest?: (ctx: string) => void;
 }) {
-  const animStyle = useDiningAnimation(progress);
-
   return (
     <SectionShell side="left">
-      <ContentBlock animStyle={animStyle}>
+      <ContentBlock
+        ref={elementRef}
+        style={{
+          opacity: 0,
+          transform: "translate(0px, 20px) scale(0.85)",
+          transformOrigin: "left center",
+          filter: "blur(10px)",
+          willChange: "opacity, transform, filter",
+        }}
+      >
         <SubTag>Where every meal is a ceremony, every flavour a memory.</SubTag>
         <GoldRule />
         <SectionHeadline>A Table Set for Royalty</SectionHeadline>
@@ -310,51 +186,13 @@ const ROOM_DATA = [
   },
 ] as const;
 
-// ─── Custom Animation for Rooms ───────────────────────────────────────────────
-function useRoomsAnimation(progress: number): React.CSSProperties {
-  return useMemo(() => {
-    let opacity = 0;
-    let translateY = 0;
-    const scale = 0.85;
-    let blur = 0;
-
-    if (progress < 0.15) {
-      const t = progress / 0.15;
-      opacity = t;
-      blur = 10 * (1 - t);
-      translateY = 20 * (1 - t);
-    } else if (progress < 0.85) {
-      opacity = 1;
-      blur = 0;
-    } else {
-      const t = (progress - 0.85) / 0.15;
-      opacity = 1 - t;
-      blur = t * 10;
-      translateY = -(t * 20);
-    }
-
-    return {
-      opacity,
-      transform: `translateY(${translateY}px) scale(${scale})`,
-      transformOrigin: "left center",
-      filter: blur > 0.5 ? `blur(${blur}px)` : "none",
-      willChange: "opacity, transform, filter",
-    };
-  }, [progress]);
-}
-
-// Rooms cycling sequence configuration
-
 function RoomsSection({
-  progress,
+  elementRef,
   onBookingRequest,
 }: {
-  progress: number;
+  elementRef: React.RefObject<HTMLDivElement | null>;
   onBookingRequest?: (ctx: string) => void;
 }) {
-  const animStyle = useRoomsAnimation(progress);
-  const isActive = progress > 0.05 && progress < 0.95;
-
   return (
     <SectionShell side="left">
       <style>{`
@@ -391,7 +229,19 @@ function RoomsSection({
           }
         }
       `}</style>
-      <div style={{ ...animStyle, width: "100%", maxWidth: "520px" }} className="pointer-events-auto">
+      <div
+        ref={elementRef}
+        style={{
+          opacity: 0,
+          transform: "translateY(20px) scale(0.85)",
+          transformOrigin: "left center",
+          filter: "blur(10px)",
+          willChange: "opacity, transform, filter",
+          width: "100%",
+          maxWidth: "520px",
+        }}
+        className="pointer-events-auto"
+      >
         {/* Header */}
         <div className="text-left mb-[20px]">
           <SubTag>Luxury Rooms &amp; Suites</SubTag>
@@ -411,7 +261,7 @@ function RoomsSection({
               animationDuration: "16s",
               animationIterationCount: "infinite",
               animationDelay: `${index * -4}s`,
-              animationPlayState: isActive ? "running" : "paused",
+              animationPlayState: "var(--play-state, paused)",
               position: "absolute",
               top: 0,
               left: 0,
@@ -440,19 +290,20 @@ function RoomsSection({
 
 // ─── Chapter 6 → Contact ──────────────────────────────────────────────────────
 
-function ContactSection({ progress }: { progress: number }) {
-  const animStyle = useCinematicText(progress, {
-    approachEnd: 0.18,
-    readingEnd: 0.9,
-  });
-
+function ContactSection({ elementRef }: { elementRef: React.RefObject<HTMLDivElement | null> }) {
   const [menuOpen, setMenuOpen] = useState<"dining" | "banquet" | "contact" | null>(null);
 
   return (
     <>
       <div className="absolute inset-0 flex items-end justify-center pb-[clamp(60px,10vh,100px)] pointer-events-none z-10">
         <div
-          style={animStyle}
+          ref={elementRef}
+          style={{
+            opacity: 0,
+            transform: "translateY(32px) scale(0.72)",
+            filter: "blur(10px)",
+            willChange: "opacity, transform, filter",
+          }}
           className="flex flex-wrap justify-center gap-[16px] pointer-events-auto"
         >
           <GoldButton onClick={() => setMenuOpen("contact")}>
@@ -569,17 +420,190 @@ function ContactSection({ progress }: { progress: number }) {
 
 // ─── Main Switcher ────────────────────────────────────────────────────────────
 
-export function ChapterViews({ chapterIndex, progress, onBookingRequest }: ChapterViewsProps) {
-  switch (chapterIndex) {
-    case 1:
-      return <ReceptionSection progress={progress} onBookingRequest={onBookingRequest} />;
-    case 2:
-      return <DiningSection progress={progress} onBookingRequest={onBookingRequest} />;
-    case 4:
-      return <RoomsSection progress={progress} onBookingRequest={onBookingRequest} />;
-    case 6:
-      return <ContactSection progress={progress} />;
-    default:
-      return null;
+export const ChapterViews = forwardRef<ChapterViewsRef, ChapterViewsProps>(
+  ({ chapterIndex, onBookingRequest }, ref) => {
+    const elementRef = useRef<HTMLDivElement>(null);
+    const settersRef = useRef<{
+      opacity?: any;
+      x?: any;
+      y?: any;
+      scale?: any;
+      blur?: any;
+      playState?: any;
+    }>({});
+
+    const initSetters = () => {
+      if (settersRef.current.opacity) return;
+      if (!elementRef.current) return;
+
+      settersRef.current = {
+        opacity: gsap.quickSetter(elementRef.current, "opacity"),
+        x: gsap.quickSetter(elementRef.current, "x", "px"),
+        y: gsap.quickSetter(elementRef.current, "y", "px"),
+        scale: gsap.quickSetter(elementRef.current, "scale"),
+        blur: gsap.quickSetter(elementRef.current, "filter"),
+        playState: (val: string) => {
+          elementRef.current?.style.setProperty("--play-state", val);
+        },
+      };
+    };
+
+    useImperativeHandle(ref, () => ({
+      update: (progress: number) => {
+        initSetters();
+        const s = settersRef.current;
+        if (!s.opacity) return;
+
+        let opacity = 0;
+        let scale = 0.85;
+        let x = 0;
+        let y = 0;
+        let blur = 0;
+
+        if (chapterIndex === 1) {
+          // Reception animation calculation
+          if (progress < 0.1) {
+            opacity = 0;
+            blur = 10;
+            y = 20;
+          } else if (progress < 0.2) {
+            const t = (progress - 0.1) / 0.1;
+            opacity = t;
+            blur = 10 * (1 - t);
+            y = 20 * (1 - t);
+          } else if (progress < 0.5) {
+            const t = (progress - 0.2) / 0.3;
+            opacity = 1;
+            x = t * 80;
+            blur = 0;
+          } else if (progress < 0.6) {
+            const t = (progress - 0.5) / 0.1;
+            opacity = 1 - t;
+            blur = t * 15;
+            x = 80 + t * 30;
+          } else {
+            opacity = 0;
+            blur = 10;
+          }
+
+          s.opacity(opacity);
+          s.x(x);
+          s.y(y);
+          s.scale(scale);
+          s.blur(blur > 0.5 ? `blur(${blur}px)` : "none");
+
+        } else if (chapterIndex === 2) {
+          // Dining animation calculation
+          if (progress < 0.1) {
+            const t = progress / 0.1;
+            opacity = t;
+            blur = 10 * (1 - t);
+            y = 20 * (1 - t);
+          } else if (progress < 0.5) {
+            const t = (progress - 0.1) / 0.4;
+            opacity = 1;
+            x = -(t * 20);
+            blur = 0;
+          } else if (progress < 0.7) {
+            const t = (progress - 0.5) / 0.2;
+            opacity = 1 - t;
+            blur = t * 15;
+            x = -20 - (t * 80);
+          } else {
+            opacity = 0;
+            blur = 10;
+          }
+
+          s.opacity(opacity);
+          s.x(x);
+          s.y(y);
+          s.scale(scale);
+          s.blur(blur > 0.5 ? `blur(${blur}px)` : "none");
+
+        } else if (chapterIndex === 4) {
+          // Rooms animation calculation
+          if (progress < 0.15) {
+            const t = progress / 0.15;
+            opacity = t;
+            blur = 10 * (1 - t);
+            y = 20 * (1 - t);
+          } else if (progress < 0.85) {
+            opacity = 1;
+            blur = 0;
+          } else {
+            const t = (progress - 0.85) / 0.15;
+            opacity = 1 - t;
+            blur = t * 10;
+            y = -(t * 20);
+          }
+
+          s.opacity(opacity);
+          s.x(x);
+          s.y(y);
+          s.scale(scale);
+          s.blur(blur > 0.5 ? `blur(${blur}px)` : "none");
+
+          const isActive = progress > 0.05 && progress < 0.95;
+          s.playState!(isActive ? "running" : "paused");
+
+        } else if (chapterIndex === 6) {
+          // Cinematic text/Contact animation calculation
+          const approachEnd = 0.18;
+          const readingEnd = 0.9;
+          const exitStagger = 0;
+          const p = Math.max(0, progress - exitStagger);
+
+          let scaleCinematic = 0.72;
+          let yCinematic = 32;
+          let blurCinematic = 10;
+
+          if (p <= 0) {
+            opacity = 0;
+            scaleCinematic = 0.72;
+            yCinematic = 32;
+            blurCinematic = 10;
+          } else if (p < approachEnd) {
+            const t = p / approachEnd;
+            const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            opacity = e;
+            scaleCinematic = 0.72 + e * 0.28;
+            yCinematic = (1 - e) * 32;
+            blurCinematic = (1 - e) * 10;
+          } else if (p < readingEnd) {
+            opacity = 1;
+            scaleCinematic = 1;
+            yCinematic = 0;
+            blurCinematic = 0;
+          } else {
+            const t = (p - readingEnd) / (1 - readingEnd);
+            const e = t * t;
+            opacity = 1 - e;
+            scaleCinematic = 1 + e * 0.12;
+            yCinematic = -e * 18;
+            blurCinematic = e * 5;
+          }
+
+          s.opacity(opacity);
+          s.x(0);
+          s.y(yCinematic);
+          s.scale(scaleCinematic);
+          s.blur(blurCinematic > 0.5 ? `blur(${blurCinematic}px)` : "none");
+        }
+      },
+    }));
+
+    switch (chapterIndex) {
+      case 1:
+        return <ReceptionSection elementRef={elementRef} onBookingRequest={onBookingRequest} />;
+      case 2:
+        return <DiningSection elementRef={elementRef} onBookingRequest={onBookingRequest} />;
+      case 4:
+        return <RoomsSection elementRef={elementRef} onBookingRequest={onBookingRequest} />;
+      case 6:
+        return <ContactSection elementRef={elementRef} />;
+      default:
+        return null;
+    }
   }
-}
+);
+ChapterViews.displayName = "ChapterViews";

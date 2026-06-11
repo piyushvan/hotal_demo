@@ -47,6 +47,7 @@ AGENTS.md
 
 # generated large assets (not deployed)
 /public/master_frames/
+/public/scrolling/original/
 
 # IDE / editor
 .idea/
