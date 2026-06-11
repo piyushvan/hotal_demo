@@ -6,7 +6,6 @@ import { GallerySection } from "@/components/sections/GallerySection";
 import { AboutSection } from "@/components/sections/AboutSection";
 import { FaqSection } from "@/components/sections/FaqSection";
 import { ContactAndFooter } from "@/components/sections/ContactAndFooter";
-import { Preloader } from "@/components/ui/Preloader";
 
 const SECTION_H = 1200; // vh — height of each scroll-video section
 const SECTION_STEP = 1000; // vh — distance between each section's start point (overlap = 200vh)
@@ -30,28 +29,8 @@ const VIDEO_URLS = [
 ];
 
 export function MainPage() {
-  const [loading, setLoading] = useState(true);
-  const [fadeOut, setFadeOut] = useState(false);
-  const [loadedCount, setLoadedCount] = useState(0);
-
-  const progress = Math.round((loadedCount / VIDEO_URLS.length) * 100);
-
-  // Trigger preloader fadeout when all videos have buffered enough to play smoothly
-  useEffect(() => {
-    if (loadedCount === VIDEO_URLS.length) {
-      setTimeout(() => {
-        setFadeOut(true);
-        setTimeout(() => {
-          setLoading(false);
-        }, 800);
-      }, 400);
-    }
-  }, [loadedCount]);
-
   return (
     <main style={{ background: "#000000", minHeight: "100vh" }}>
-      {/* Preloading Screen Overlay */}
-      {loading && <Preloader progress={progress} fadeOut={fadeOut} />}
 
       {/* Main visual elements */}
       <div className="relative w-full" style={{ height: `${TOTAL_H}vh` }}>
@@ -68,7 +47,6 @@ export function MainPage() {
               exitStyle={s.exit}
               overlayType={s.overlay}
               height={SECTION_H}
-              onLoaded={() => setLoadedCount(c => c + 1)}
             />
           );
         })}

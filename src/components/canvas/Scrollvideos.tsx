@@ -32,7 +32,6 @@ export default function ScrollVideo({
   id,
   onBookingRequest,
   height = 800,
-  onLoaded,
 }: {
   src: string;
   zIndex?: number;
@@ -44,7 +43,6 @@ export default function ScrollVideo({
   id?: string;
   onBookingRequest?: (context: string) => void;
   height?: number;
-  onLoaded?: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -228,6 +226,35 @@ export default function ScrollVideo({
     };
   }, [tick]);
 
+  // ─── Lazy preload: switch from "metadata" to "auto" when near viewport ──
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const video = videoRef.current;
+    if (!container || !video) return;
+
+    const preloadObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          video.preload = 'auto';
+          // Only load() if it hasn't started
+          if (video.readyState === 0) {
+             video.load();
+          }
+          preloadObserver.disconnect();
+        }
+      },
+      {
+        // Start loading when within 2 viewports of the section
+        rootMargin: '200% 0px 200% 0px',
+        threshold: 0,
+      }
+    );
+
+    preloadObserver.observe(container);
+    return () => preloadObserver.disconnect();
+  }, []);
+
   // ─── Derive overlay chapterIndex ──────────────────────────────────────────
 
   const chapterIndex = overlayType ? CHAPTER_INDEX[overlayType] : null;
@@ -248,8 +275,7 @@ export default function ScrollVideo({
           className="w-full h-full object-cover"
           muted
           playsInline
-          preload="auto"
-          onCanPlayThrough={onLoaded}
+          preload="metadata"
           style={{
             // Start hidden; opacity is controlled via JS
             // willChange is toggled dynamically in the IntersectionObserver (Fix #4)
