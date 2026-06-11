@@ -21,11 +21,11 @@ const SECTIONS = [
 ];
 
 const VIDEO_URLS = [
-  "https://dtq9wpk97lso7h0s.public.blob.vercel-storage.com/part1_scroll.mp4",
-  "https://dtq9wpk97lso7h0s.public.blob.vercel-storage.com/part2_scroll.mp4",
-  "https://dtq9wpk97lso7h0s.public.blob.vercel-storage.com/part3_scroll.mp4",
-  "https://dtq9wpk97lso7h0s.public.blob.vercel-storage.com/part4_scroll.mp4",
-  "https://dtq9wpk97lso7h0s.public.blob.vercel-storage.com/part5_scroll.mp4",
+  "https://dtq9wpk97lso7h0s.public.blob.vercel-storage.com/part1_scroll.mp4?v=2",
+  "https://dtq9wpk97lso7h0s.public.blob.vercel-storage.com/part2_scroll.mp4?v=2",
+  "https://dtq9wpk97lso7h0s.public.blob.vercel-storage.com/part3_scroll.mp4?v=2",
+  "https://dtq9wpk97lso7h0s.public.blob.vercel-storage.com/part4_scroll.mp4?v=2",
+  "https://dtq9wpk97lso7h0s.public.blob.vercel-storage.com/part5_scroll.mp4?v=2",
 ];
 
 export function MainPage() {
