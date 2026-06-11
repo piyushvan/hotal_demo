@@ -18,7 +18,7 @@
       ]
     },
     {
-      "source": "/gallary/(.*)",
+      "source": "/gallery/(.*)",
       "headers": [
         {
           "key": "Cache-Control",

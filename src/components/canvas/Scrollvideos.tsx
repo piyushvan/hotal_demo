@@ -32,6 +32,7 @@ export default function ScrollVideo({
   id,
   onBookingRequest,
   height = 800,
+  onLoaded,
 }: {
   src: string;
   zIndex?: number;
@@ -43,6 +44,7 @@ export default function ScrollVideo({
   id?: string;
   onBookingRequest?: (context: string) => void;
   height?: number;
+  onLoaded?: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -97,25 +99,20 @@ export default function ScrollVideo({
       isInitializedRef.current = true;
     }
 
-    // ── Spring Physics Model ──────────────────────────────────────────────────
-    // stiffness: how eagerly the spring chases the target (higher = snappier)
-    // damping:   how quickly velocity bleeds off (higher = less oscillation)
-    // A critically-damped spring (damping ≈ 2*sqrt(stiffness)) gives silky
-    // deceleration with zero overshoot — ideal for scroll scrubbing.
-    const stiffness = 120; // spring constant (units/s²)
-    const damping = 22;    // damping coefficient (units/s)
+    // ── Smooth Scroll Physics Model ──────────────────────────────────────────
+    // Euler-integrated springs can cause micro-oscillations that force the 
+    // video decoder to jitter heavily. We use a frame-rate independent 
+    // exponential decay (lerp) for perfectly smooth, monotonic deceleration.
+    const decay = 5.0; // Snappiness coefficient (higher = faster catch-up)
+    
+    let currentProgress = animatedProgressRef.current;
+    
+    // Frame-rate independent lerp formula: current += (target - current) * (1 - e^(-decay * dt))
+    currentProgress += (targetProgress - currentProgress) * (1 - Math.exp(-decay * dt));
 
-    const displacement = targetProgress - animatedProgressRef.current;
-    const springForce = stiffness * displacement;
-    const dampingForce = damping * velocityRef.current;
-
-    velocityRef.current += (springForce - dampingForce) * dt;
-    let currentProgress = animatedProgressRef.current + velocityRef.current * dt;
-
-    // Snap to target when both position error and velocity are negligible
-    if (Math.abs(currentProgress - targetProgress) < 0.00005 && Math.abs(velocityRef.current) < 0.0005) {
+    // Snap to target when extremely close to prevent endless tiny DOM updates
+    if (Math.abs(currentProgress - targetProgress) < 0.00005) {
       currentProgress = targetProgress;
-      velocityRef.current = 0;
     }
 
     // Hard-clamp to prevent floating point from ever escaping [0, 1]
@@ -231,32 +228,6 @@ export default function ScrollVideo({
     };
   }, [tick]);
 
-  // ─── Lazy preload: switch from "metadata" to "auto" when near viewport ──
-
-  useEffect(() => {
-    const container = containerRef.current;
-    const video = videoRef.current;
-    if (!container || !video) return;
-
-    const preloadObserver = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          video.preload = 'auto';
-          video.load();
-          preloadObserver.disconnect();
-        }
-      },
-      {
-        // Start loading when within 2 viewports of the section
-        rootMargin: '200% 0px 200% 0px',
-        threshold: 0,
-      }
-    );
-
-    preloadObserver.observe(container);
-    return () => preloadObserver.disconnect();
-  }, []);
-
   // ─── Derive overlay chapterIndex ──────────────────────────────────────────
 
   const chapterIndex = overlayType ? CHAPTER_INDEX[overlayType] : null;
@@ -277,7 +248,8 @@ export default function ScrollVideo({
           className="w-full h-full object-cover"
           muted
           playsInline
-          preload="metadata"
+          preload="auto"
+          onCanPlayThrough={onLoaded}
           style={{
             // Start hidden; opacity is controlled via JS
             // willChange is toggled dynamically in the IntersectionObserver (Fix #4)

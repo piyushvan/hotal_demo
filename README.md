@@ -30,7 +30,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ```
 public/
-  gallary/       → Hotel gallery images (33 images)
+  gallery/       → Hotel gallery images (33 images)
   scrolling/     → 5 scroll-driven video segments (~94MB)
 
 src/

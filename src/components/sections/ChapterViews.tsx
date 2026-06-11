@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useState, forwardRef, useImperativeHandle, useRef } from "react";
+import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 import { gsap } from "gsap";
 import { GoldRule, SubTag, GoldButton } from "@/components/ui/DesignSystem";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+// gsap.quickSetter returns a function that accepts a numeric/string value.
+// The installed GSAP types declare the return as `Function`; we narrow it here.
+type GsapSetter = (value: number | string) => void;
 
 export interface ChapterViewsProps {
   chapterIndex: number;
@@ -259,6 +263,18 @@ function RoomsSection({
 function ContactSection({ elementRef }: { elementRef: React.RefObject<HTMLDivElement | null> }) {
   const [menuOpen, setMenuOpen] = useState<"dining" | "banquet" | "contact" | null>(null);
 
+  // ─── Body scroll lock — freezes background GSAP scrubber while modal is open ─
+  useEffect(() => {
+    if (menuOpen !== null) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
   return (
     <>
       <div className="absolute inset-0 flex items-end justify-center pb-[clamp(60px,10vh,100px)] pointer-events-none z-10">
@@ -390,12 +406,12 @@ export const ChapterViews = forwardRef<ChapterViewsRef, ChapterViewsProps>(
   ({ chapterIndex, onBookingRequest }, ref) => {
     const elementRef = useRef<HTMLDivElement>(null);
     const settersRef = useRef<{
-      opacity?: any;
-      x?: any;
-      y?: any;
-      scale?: any;
-      blur?: any;
-      playState?: any;
+      opacity?: GsapSetter;
+      x?: GsapSetter;
+      y?: GsapSetter;
+      scale?: GsapSetter;
+      blur?: GsapSetter;
+      playState?: (val: string) => void;
     }>({});
 
     const initSetters = () => {
@@ -403,11 +419,11 @@ export const ChapterViews = forwardRef<ChapterViewsRef, ChapterViewsProps>(
       if (!elementRef.current) return;
 
       settersRef.current = {
-        opacity: gsap.quickSetter(elementRef.current, "opacity"),
-        x: gsap.quickSetter(elementRef.current, "x", "px"),
-        y: gsap.quickSetter(elementRef.current, "y", "px"),
-        scale: gsap.quickSetter(elementRef.current, "scale"),
-        blur: gsap.quickSetter(elementRef.current, "filter"),
+        opacity: gsap.quickSetter(elementRef.current, "opacity") as GsapSetter,
+        x: gsap.quickSetter(elementRef.current, "x", "px") as GsapSetter,
+        y: gsap.quickSetter(elementRef.current, "y", "px") as GsapSetter,
+        scale: gsap.quickSetter(elementRef.current, "scale") as GsapSetter,
+        blur: gsap.quickSetter(elementRef.current, "filter") as GsapSetter,
         playState: (val: string) => {
           elementRef.current?.style.setProperty("--play-state", val);
         },
@@ -457,11 +473,11 @@ export const ChapterViews = forwardRef<ChapterViewsRef, ChapterViewsProps>(
             blur = 10;
           }
 
-          s.opacity(opacity);
-          s.x(x);
-          s.y(y);
-          s.scale(scale);
-          s.blur(blur > 0.5 ? `blur(${blur}px)` : "none");
+          s.opacity!(opacity);
+          s.x!(x);
+          s.y!(y);
+          s.scale!(scale);
+          s.blur!(blur > 0.5 ? `blur(${blur}px)` : "none");
 
         } else if (chapterIndex === 2) {
           // Dining animation calculation
@@ -489,11 +505,11 @@ export const ChapterViews = forwardRef<ChapterViewsRef, ChapterViewsProps>(
             blur = 10;
           }
 
-          s.opacity(opacity);
-          s.x(x);
-          s.y(y);
-          s.scale(scale);
-          s.blur(blur > 0.5 ? `blur(${blur}px)` : "none");
+          s.opacity!(opacity);
+          s.x!(x);
+          s.y!(y);
+          s.scale!(scale);
+          s.blur!(blur > 0.5 ? `blur(${blur}px)` : "none");
 
         } else if (chapterIndex === 4) {
           // Rooms animation calculation
@@ -512,11 +528,11 @@ export const ChapterViews = forwardRef<ChapterViewsRef, ChapterViewsProps>(
             y = -(t * 20);
           }
 
-          s.opacity(opacity);
-          s.x(x);
-          s.y(y);
-          s.scale(scale);
-          s.blur(blur > 0.5 ? `blur(${blur}px)` : "none");
+          s.opacity!(opacity);
+          s.x!(x);
+          s.y!(y);
+          s.scale!(scale);
+          s.blur!(blur > 0.5 ? `blur(${blur}px)` : "none");
 
           const isActive = progress > 0.05 && progress < 0.95;
           s.playState!(isActive ? "running" : "paused");
@@ -558,11 +574,11 @@ export const ChapterViews = forwardRef<ChapterViewsRef, ChapterViewsProps>(
             blurCinematic = e * 5;
           }
 
-          s.opacity(opacity);
-          s.x(0);
-          s.y(yCinematic);
-          s.scale(scaleCinematic);
-          s.blur(blurCinematic > 0.5 ? `blur(${blurCinematic}px)` : "none");
+          s.opacity!(opacity);
+          s.x!(0);
+          s.y!(yCinematic);
+          s.scale!(scaleCinematic);
+          s.blur!(blurCinematic > 0.5 ? `blur(${blurCinematic}px)` : "none");
         }
       },
     }));

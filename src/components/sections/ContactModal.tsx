@@ -62,6 +62,18 @@ export function ContactModal({ isOpen, context = "", onClose }: ContactModalProp
 
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
+  // ─── Body scroll lock — prevents background GSAP scroll scrubber firing ──────
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     if (isOpen) {
       setForm((prev) => ({ ...prev, roomType: contextToRoomType[context] ?? prev.roomType }));

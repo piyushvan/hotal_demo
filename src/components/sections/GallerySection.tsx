@@ -4,25 +4,25 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useReveal } from "@/hooks/useReveal";
 
-// ─── Gallery data — real hotel images from public/gallary ─────────────────────
+// ─── Gallery data — real hotel images from public/gallery ────────────────────
 const GALLERY_IMAGES = [
-  { id: "g3",  src: "/gallary/image3.jpg",   alt: "Grand Reception",                category: "Lobby"    },
-  { id: "g9",  src: "/gallary/image9.jpg",   alt: "Restaurant Interior",            category: "Dining"   },
-  { id: "g11", src: "/gallary/image11.jpeg", alt: "Buffet Spread",                  category: "Dining"   },
-  { id: "g12", src: "/gallary/image12.jpeg", alt: "Club Room",                      category: "Rooms"    },
-  { id: "g13", src: "/gallary/image13.jpeg", alt: "Deluxe Room",                    category: "Rooms"    },
-  { id: "g14", src: "/gallary/image14.jpeg", alt: "Suite Bedroom",                  category: "Rooms"    },
-  { id: "g15", src: "/gallary/image15.jpeg", alt: "Room View",                      category: "Rooms"    },
-  { id: "g16", src: "/gallary/image16.jpeg", alt: "Quad Room",                      category: "Rooms"    },
-  { id: "g20", src: "/gallary/image20.jpeg", alt: "Banquet Setup",                  category: "Banquet"  },
-  { id: "g21", src: "/gallary/image21.jpg",  alt: "Wedding Hall",                   category: "Banquet"  },
-  { id: "g23", src: "/gallary/image23.jpeg", alt: "Banquet Lighting",               category: "Banquet"  },
-  { id: "g24", src: "/gallary/image24.jpg",  alt: "Corporate Event Setup",          category: "Banquet"  },
-  { id: "g25", src: "/gallary/image25.jpeg", alt: "Hotel Exterior — Day",           category: "Exterior" },
-  { id: "g26", src: "/gallary/image26.jpeg", alt: "Hotel Facade",                   category: "Exterior" },
-  { id: "g27", src: "/gallary/image27.jpeg", alt: "Hotel at Night",                 category: "Exterior" },
-  { id: "g28", src: "/gallary/image28.jpeg", alt: "Parking Area",                   category: "Exterior" },
-  { id: "g29", src: "/gallary/image29.jpeg", alt: "Surrounding Area",               category: "Exterior" },
+  { id: "g3",  src: "/gallery/image3.jpg",   alt: "Grand Reception",                category: "Lobby"    },
+  { id: "g9",  src: "/gallery/image9.jpg",   alt: "Restaurant Interior",            category: "Dining"   },
+  { id: "g11", src: "/gallery/image11.jpeg", alt: "Buffet Spread",                  category: "Dining"   },
+  { id: "g12", src: "/gallery/image12.jpeg", alt: "Club Room",                      category: "Rooms"    },
+  { id: "g13", src: "/gallery/image13.jpeg", alt: "Deluxe Room",                    category: "Rooms"    },
+  { id: "g14", src: "/gallery/image14.jpeg", alt: "Suite Bedroom",                  category: "Rooms"    },
+  { id: "g15", src: "/gallery/image15.jpeg", alt: "Room View",                      category: "Rooms"    },
+  { id: "g16", src: "/gallery/image16.jpeg", alt: "Quad Room",                      category: "Rooms"    },
+  { id: "g20", src: "/gallery/image20.jpeg", alt: "Banquet Setup",                  category: "Banquet"  },
+  { id: "g21", src: "/gallery/image21.jpg",  alt: "Wedding Hall",                   category: "Banquet"  },
+  { id: "g23", src: "/gallery/image23.jpeg", alt: "Banquet Lighting",               category: "Banquet"  },
+  { id: "g24", src: "/gallery/image24.jpg",  alt: "Corporate Event Setup",          category: "Banquet"  },
+  { id: "g25", src: "/gallery/image25.jpeg", alt: "Hotel Exterior — Day",           category: "Exterior" },
+  { id: "g26", src: "/gallery/image26.jpeg", alt: "Hotel Facade",                   category: "Exterior" },
+  { id: "g27", src: "/gallery/image27.jpeg", alt: "Hotel at Night",                 category: "Exterior" },
+  { id: "g28", src: "/gallery/image28.jpeg", alt: "Parking Area",                   category: "Exterior" },
+  { id: "g29", src: "/gallery/image29.jpeg", alt: "Surrounding Area",               category: "Exterior" },
 ];
 
 const CATEGORIES = ["All", "Lobby", "Dining", "Rooms", "Banquet", "Exterior"];
