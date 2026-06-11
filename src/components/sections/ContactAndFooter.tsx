@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import { useReveal } from "@/hooks/useReveal";
 
 const QUICK_LINKS = [
   { label: "Home",           href: "#hero"    },
@@ -64,6 +65,7 @@ export function ContactAndFooter() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [newsEmail, setNewsEmail] = useState("");
   const [newsSubscribed, setNewsSubscribed] = useState(false);
+  const contactRef = useReveal<HTMLElement>();
 
   const inputBaseClass = "w-full py-[11px] px-[14px] bg-white/5 border border-brand-gold/20 text-white font-sans text-[13px] outline-none transition-colors duration-200 focus:border-brand-gold/45";
 
@@ -107,6 +109,7 @@ export function ContactAndFooter() {
           CONTACT SECTION
       ═══════════════════════════════════════ */}
       <section
+        ref={contactRef}
         id="contact"
         aria-labelledby="contact-heading"
         className="bg-[#060606] px-[clamp(24px,6vw,80px)] py-[clamp(64px,10vh,120px)] border-t border-brand-gold/10"
@@ -116,7 +119,7 @@ export function ContactAndFooter() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-[clamp(40px,6vw,80px)] items-start">
             
             {/* Left: Info */}
-            <div>
+            <div data-reveal>
               <p className="font-sans text-[10px] tracking-[0.45em] uppercase text-brand-gold/70 mb-[14px]">
                 GET IN TOUCH
               </p>
@@ -199,7 +202,7 @@ export function ContactAndFooter() {
             </div>
 
             {/* Right: Form */}
-            <div>
+            <div data-reveal data-reveal-delay="2">
               {status === "success" ? (
                 <div className="p-[48px] text-center border border-brand-gold/25 bg-brand-gold/5">
                   <div className="w-[56px] h-[56px] border border-brand-gold/50 rounded-full flex items-center justify-center mx-auto mb-[20px]">

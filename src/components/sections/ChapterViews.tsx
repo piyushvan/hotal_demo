@@ -195,40 +195,6 @@ function RoomsSection({
 }) {
   return (
     <SectionShell side="left">
-      <style>{`
-        @keyframes cycleRooms {
-          0% {
-            opacity: 0;
-            filter: blur(10px);
-            transform: translateY(20px);
-            pointer-events: none;
-          }
-          6.25% { /* 1s fade-in */
-            opacity: 1;
-            filter: blur(0px);
-            transform: translateY(0px);
-            pointer-events: auto;
-          }
-          18.75% { /* stay visible until 3s */
-            opacity: 1;
-            filter: blur(0px);
-            transform: translateY(0px);
-            pointer-events: auto;
-          }
-          25% { /* 4s fade-out */
-            opacity: 0;
-            filter: blur(10px);
-            transform: translateY(-20px);
-            pointer-events: none;
-          }
-          100% {
-            opacity: 0;
-            filter: blur(10px);
-            transform: translateY(-20px);
-            pointer-events: none;
-          }
-        }
-      `}</style>
       <div
         ref={elementRef}
         style={{
@@ -464,25 +430,30 @@ export const ChapterViews = forwardRef<ChapterViewsRef, ChapterViewsProps>(
           // Reception animation calculation
           if (progress < 0.1) {
             opacity = 0;
+            scale = 0.85;
             blur = 10;
             y = 20;
           } else if (progress < 0.2) {
             const t = (progress - 0.1) / 0.1;
             opacity = t;
+            scale = 0.85 + t * 0.15; // 0.85 → 1.0
             blur = 10 * (1 - t);
             y = 20 * (1 - t);
           } else if (progress < 0.5) {
             const t = (progress - 0.2) / 0.3;
             opacity = 1;
+            scale = 1;
             x = t * 80;
             blur = 0;
           } else if (progress < 0.6) {
             const t = (progress - 0.5) / 0.1;
             opacity = 1 - t;
+            scale = 1;
             blur = t * 15;
             x = 80 + t * 30;
           } else {
             opacity = 0;
+            scale = 0.85;
             blur = 10;
           }
 
@@ -497,20 +468,24 @@ export const ChapterViews = forwardRef<ChapterViewsRef, ChapterViewsProps>(
           if (progress < 0.1) {
             const t = progress / 0.1;
             opacity = t;
+            scale = 0.85 + t * 0.15; // 0.85 → 1.0
             blur = 10 * (1 - t);
             y = 20 * (1 - t);
           } else if (progress < 0.5) {
             const t = (progress - 0.1) / 0.4;
             opacity = 1;
+            scale = 1;
             x = -(t * 20);
             blur = 0;
           } else if (progress < 0.7) {
             const t = (progress - 0.5) / 0.2;
             opacity = 1 - t;
+            scale = 1;
             blur = t * 15;
             x = -20 - (t * 80);
           } else {
             opacity = 0;
+            scale = 0.85;
             blur = 10;
           }
 

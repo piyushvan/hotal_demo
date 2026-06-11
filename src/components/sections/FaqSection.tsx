@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useRef } from "react";
+import { useReveal } from "@/hooks/useReveal";
 
 const FAQ_DATA = [
   {
@@ -109,19 +110,19 @@ function FAQItem({ id, question, answer, isOpen, onToggle, index }: FAQItemProps
         </div>
       </button>
 
-      {/* Answer panel */}
+      {/* Answer panel — grid-template-rows animates to exact content height */}
       <div
         id={`${id}-panel`}
         role="region"
         aria-labelledby={`${id}-btn`}
-        className={`overflow-hidden transition-all duration-[450ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
-          isOpen ? "max-h-[400px]" : "max-h-0"
-        }`}
+        className={`faq-panel ${isOpen ? "open" : ""}`}
       >
-        <div className="pb-[clamp(18px,2.5vh,28px)] pl-[48px]">
-          <p className="font-cormorant text-[clamp(0.95rem,1.2vw,1.1rem)] text-white/65 leading-[1.85] m-0">
-            {answer}
-          </p>
+        <div className="faq-panel-inner">
+          <div className="pb-[clamp(18px,2.5vh,28px)] pl-[48px]">
+            <p className="font-cormorant text-[clamp(0.95rem,1.2vw,1.1rem)] text-white/65 leading-[1.85] m-0">
+              {answer}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -130,20 +131,22 @@ function FAQItem({ id, question, answer, isOpen, onToggle, index }: FAQItemProps
 
 export function FaqSection() {
   const [openId, setOpenId] = useState<string | null>("faq-1");
+  const sectionRef = useReveal<HTMLElement>();
 
-  const handleToggle = (id: string) => {
+  const handleToggle = useCallback((id: string) => {
     setOpenId((prev) => (prev === id ? null : id));
-  };
+  }, []);
 
   return (
     <section
+      ref={sectionRef}
       id="faq"
       aria-labelledby="faq-heading"
       className="bg-[#080808] px-[clamp(24px,6vw,80px)] py-[clamp(64px,10vh,120px)] border-t border-brand-gold/10"
     >
       <div className="max-w-[900px] mx-auto">
         {/* Header */}
-        <div className="mb-[clamp(40px,6vh,64px)]">
+        <div data-reveal className="mb-[clamp(40px,6vh,64px)]">
           <p className="font-sans text-[10px] tracking-[0.45em] uppercase text-brand-gold/70 mb-[14px]">
             GUEST ENQUIRIES
           </p>
@@ -164,7 +167,7 @@ export function FaqSection() {
         <div className="h-[1px] bg-[linear-gradient(90deg,rgba(212,175,55,0.4),transparent)] mb-[clamp(8px,1.5vh,16px)]" />
 
         {/* FAQ list */}
-        <div>
+        <div data-reveal data-reveal-delay="1">
           {FAQ_DATA.map((faq, index) => (
             <FAQItem
               key={faq.id}
@@ -179,7 +182,7 @@ export function FaqSection() {
         </div>
 
         {/* CTA */}
-        <div className="mt-[clamp(40px,6vh,64px)] p-[clamp(24px,3.5vh,40px)] bg-brand-gold/5 border border-brand-gold/15 flex items-center justify-between flex-wrap gap-[20px]">
+        <div data-reveal data-reveal-delay="2" className="mt-[clamp(40px,6vh,64px)] p-[clamp(24px,3.5vh,40px)] bg-brand-gold/5 border border-brand-gold/15 flex items-center justify-between flex-wrap gap-[20px]">
           <div>
             <p className="font-playfair text-[clamp(1.1rem,1.6vw,1.4rem)] font-semibold text-white mb-[6px]">
               Still have questions?

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useReveal } from "@/hooks/useReveal";
 
 const PILLARS = [
   {
@@ -33,14 +34,17 @@ const STATS = [
 ];
 
 export function AboutSection() {
+  const sectionRef = useReveal<HTMLElement>();
+
   return (
     <section
+      ref={sectionRef}
       id="about"
       aria-labelledby="about-heading"
       className="bg-[#050505] border-t border-brand-gold/10 overflow-hidden"
     >
       {/* ── Hero Banner ── */}
-      <div className="relative px-[clamp(24px,6vw,80px)] py-[clamp(80px,14vh,160px)] bg-[linear-gradient(135deg,rgba(212,175,55,0.04)_0%,transparent_50%,rgba(212,175,55,0.02)_100%)] text-center overflow-hidden">
+      <div data-reveal className="relative px-[clamp(24px,6vw,80px)] py-[clamp(80px,14vh,160px)] bg-[linear-gradient(135deg,rgba(212,175,55,0.04)_0%,transparent_50%,rgba(212,175,55,0.02)_100%)] text-center overflow-hidden">
         {/* Background decorative element */}
         <div
           aria-hidden="true"
@@ -74,7 +78,7 @@ export function AboutSection() {
       </div>
 
       {/* ── Stats Bar ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 border-y border-brand-gold/10">
+      <div data-reveal data-reveal-delay="1" className="grid grid-cols-2 md:grid-cols-4 border-y border-brand-gold/10">
         {STATS.map((stat, i) => (
           <div
             key={stat.label}
@@ -104,9 +108,11 @@ export function AboutSection() {
         </div>
 
         <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-[clamp(20px,3vw,40px)]">
-          {PILLARS.map((pillar) => (
+          {PILLARS.map((pillar, idx) => (
             <div
               key={pillar.title}
+              data-reveal
+              data-reveal-delay={String((idx % 4) + 1) as "1" | "2" | "3" | "4"}
               className="p-[clamp(24px,3.5vw,40px)] bg-white/5 border-t border-brand-gold/20 border-b border-brand-gold/10 transition-colors duration-300 ease-in-out hover:bg-brand-gold/5 hover:border-t-brand-gold/40"
             >
               <span

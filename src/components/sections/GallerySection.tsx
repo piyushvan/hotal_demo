@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
+import { useReveal } from "@/hooks/useReveal";
 
 // ─── Gallery data — real hotel images from public/gallary ─────────────────────
 const GALLERY_IMAGES = [
@@ -71,14 +72,7 @@ function Lightbox({ image, images, onClose, onNavigate }: LightboxProps) {
       onClick={onClose}
       className="fixed inset-0 z-1000 bg-black/95 backdrop-blur-[24px] flex items-center justify-center animate-[lbFadeIn_0.25s_ease_forwards]"
     >
-      <style>{`
-        @keyframes lbFadeIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-      `}</style>
-
-      {/* Counter */}
+{/* Counter */}
       <div className="absolute top-[24px] left-1/2 -translate-x-1/2 font-sans text-[10px] tracking-[0.35em] text-brand-gold/70 uppercase select-none">
         {currentIndex + 1} / {images.length}
       </div>
@@ -191,6 +185,25 @@ function GalleryThumbnail({ image, onClick, priority = false }: ThumbnailProps) 
 export function GallerySection() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [lightboxId, setLightboxId] = useState<string | null>(null);
+  const [gridVisible, setGridVisible] = useState(true);
+  const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sectionRef = useReveal<HTMLElement>();
+
+  // Cross-fade when switching categories
+  const handleCategoryChange = useCallback((cat: string) => {
+    if (cat === activeCategory) return;
+    setGridVisible(false);
+    if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+    fadeTimerRef.current = setTimeout(() => {
+      setActiveCategory(cat);
+      setGridVisible(true);
+    }, 200);
+  }, [activeCategory]);
+
+  // Cleanup timer on unmount
+  useEffect(() => () => {
+    if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+  }, []);
 
   const filtered =
     activeCategory === "All"
@@ -207,12 +220,13 @@ export function GallerySection() {
 
   return (
     <section
+      ref={sectionRef}
       id="gallery"
       aria-labelledby="gallery-heading"
       className="bg-[#0a0a0a] px-[clamp(20px,5vw,72px)] py-[clamp(60px,10vh,112px)] border-t border-brand-gold/15"
     >
       {/* Header */}
-      <div className="text-center mb-[clamp(36px,6vh,64px)]">
+      <div data-reveal className="text-center mb-[clamp(36px,6vh,64px)]">
         <p className="font-sans text-[10px] tracking-[0.48em] uppercase text-brand-gold/70 mb-[16px]">
           VISUAL STORY
         </p>
@@ -234,6 +248,8 @@ export function GallerySection() {
 
       {/* Category filter tabs */}
       <div
+        data-reveal
+        data-reveal-delay="1"
         role="tablist"
         aria-label="Gallery filter"
         className="flex justify-center gap-[4px] flex-wrap mb-[clamp(28px,5vh,52px)]"
@@ -246,7 +262,7 @@ export function GallerySection() {
               role="tab"
               aria-selected={isActive}
               type="button"
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => handleCategoryChange(cat)}
               className={`py-[8px] px-[20px] font-sans text-[9px] tracking-[0.22em] uppercase cursor-pointer transition-colors duration-200 ${
                 isActive 
                   ? "bg-brand-gold/15 border border-brand-gold/70 text-brand-gold" 
@@ -259,8 +275,12 @@ export function GallerySection() {
         })}
       </div>
 
-      {/* Image Grid */}
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(clamp(200px,26vw,320px),1fr))] gap-[3px] max-w-[1400px] mx-auto">
+      {/* Image Grid — cross-fades between category changes */}
+      <div
+        className={`grid grid-cols-[repeat(auto-fill,minmax(clamp(200px,26vw,320px),1fr))] gap-[3px] max-w-[1400px] mx-auto transition-opacity duration-[200ms] ease-in-out ${
+          gridVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
         {filtered.map((img, index) => (
           <GalleryThumbnail
             key={img.id}

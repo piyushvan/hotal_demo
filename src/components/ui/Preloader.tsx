@@ -39,23 +39,7 @@ export function Preloader({ progress, fadeOut }: PreloaderProps) {
         transition: "opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)",
       }}
     >
-      {/* Keyframe styles embedded for styling the pulse */}
-      <style>{`
-        @keyframes pulseGlow {
-          0%, 100% {
-            transform: scale(1);
-            border-color: rgba(212, 175, 55, 0.25);
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.05);
-          }
-          50% {
-            transform: scale(1.04);
-            border-color: rgba(212, 175, 55, 0.65);
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
-          }
-        }
-      `}</style>
-
-      {/* Monogram branding */}
+{/* Monogram branding */}
       <div
         style={{
           width: "84px",
@@ -71,7 +55,7 @@ export function Preloader({ progress, fadeOut }: PreloaderProps) {
       >
         <span
           style={{
-            fontFamily: "'Playfair Display', 'Georgia', serif",
+            fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
             fontSize: "32px",
             fontWeight: "bold",
             color: "#d4af37",
@@ -99,7 +83,7 @@ export function Preloader({ progress, fadeOut }: PreloaderProps) {
       </h2>
       <p
         style={{
-          fontFamily: "'Cormorant Garamond', 'Georgia', serif",
+          fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
           fontSize: "10px",
           letterSpacing: "0.45em",
           color: "#d4af37",
@@ -151,7 +135,7 @@ export function Preloader({ progress, fadeOut }: PreloaderProps) {
       {/* Detail message updates */}
       <div
         style={{
-          fontFamily: "'Cormorant Garamond', 'Georgia', serif",
+          fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif",
           fontSize: "13px",
           fontStyle: "italic",
           color: "rgba(255, 255, 255, 0.45)",

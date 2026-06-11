@@ -131,7 +131,6 @@ export const HeroOverlay = forwardRef<HeroOverlayRef, {}>((props, ref) => {
             height: "1px",
             background:
               "linear-gradient(90deg, transparent, rgba(212,175,55,0.9), transparent)",
-            transition: "width 0.05s linear",
           }}
         />
         <div
